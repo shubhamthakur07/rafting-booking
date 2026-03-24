@@ -16,7 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        //
+        // Exclude contact route from CSRF verification
+        $middleware->validateCsrfTokens(except: ['/contact']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

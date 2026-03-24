@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d21c3dad9d1cf00b0d88ff86af5010f",
+    "content-hash": "11a26d211650355cb21f9c0842052bb3",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -75,7 +75,7 @@
                 "shasum": ""
             },
             "require": {
-                "php": "^8.2"
+                "php": "^8.4"
             },
             "require-dev": {
                 "php-coveralls/php-coveralls": "^2.2",
@@ -1530,7 +1530,7 @@
                 "illuminate/contracts": "^11.0|^12.0|^13.0",
                 "illuminate/database": "^11.0|^12.0|^13.0",
                 "illuminate/support": "^11.0|^12.0|^13.0",
-                "php": "^8.2",
+                "php": "^8.4",
                 "symfony/console": "^7.0|^8.0"
             },
             "require-dev": {
@@ -2702,7 +2702,7 @@
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": "^8.2",
+                "php": "^8.4",
                 "symfony/console": "^7.4.4 || ^8.0.4"
             },
             "require-dev": {
@@ -5953,16 +5953,16 @@
         },
         {
             "name": "symfony/var-dumper",
-            "version": "v8.0.6",
+            "version": "8.1.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "2e14f7e0bf5ff02c6e63bd31cb8e4855a13d6209"
+                "reference": "bbd278a21804938c65829163f5fba96e05233e38"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/2e14f7e0bf5ff02c6e63bd31cb8e4855a13d6209",
-                "reference": "2e14f7e0bf5ff02c6e63bd31cb8e4855a13d6209",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/bbd278a21804938c65829163f5fba96e05233e38",
+                "reference": "bbd278a21804938c65829163f5fba96e05233e38",
                 "shasum": ""
             },
             "require": {
@@ -5980,6 +5980,7 @@
                 "symfony/uid": "^7.4|^8.0",
                 "twig/twig": "^3.12"
             },
+            "default-branch": true,
             "bin": [
                 "Resources/bin/var-dump-server"
             ],
@@ -6016,7 +6017,7 @@
                 "dump"
             ],
             "support": {
-                "source": "https://github.com/symfony/var-dumper/tree/v8.0.6"
+                "source": "https://github.com/symfony/var-dumper/tree/8.1"
             },
             "funding": [
                 {
@@ -6036,7 +6037,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-15T10:53:29+00:00"
+            "time": "2026-03-17T15:35:01+00:00"
         },
         {
             "name": "tightenco/ziggy",
@@ -6853,7 +6854,7 @@
                 "illuminate/process": "^10.24|^11.0|^12.0|^13.0",
                 "illuminate/support": "^10.24|^11.0|^12.0|^13.0",
                 "nunomaduro/termwind": "^1.15|^2.0",
-                "php": "^8.2",
+                "php": "^8.4",
                 "symfony/console": "^6.0|^7.0|^8.0"
             },
             "require-dev": {
@@ -9549,7 +9550,7 @@
                 "ext-ctype": "*",
                 "ext-date": "*",
                 "ext-filter": "*",
-                "php": "^8.2"
+                "php": "^8.4"
             },
             "suggest": {
                 "ext-intl": "",
@@ -9596,12 +9597,17 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "symfony/var-dumper": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.3"
+        "php": "^8.4"
     },
     "platform-dev": {},
+    "platform-overrides": {
+        "php": "8.4.1"
+    },
     "plugin-api-version": "2.6.0"
 }

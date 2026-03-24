@@ -262,10 +262,11 @@
             class="aspect-square overflow-hidden rounded-lg cursor-pointer group"
           >
             <img
-              :src="image.image_path"
+              :src="image.image_url"
               :alt="image.title"
               class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
+
           </div>
         </div>
       </div>
@@ -285,7 +286,8 @@
             class="aspect-video rounded-lg overflow-hidden bg-gray-800"
           >
             <iframe
-              :src="video.video_url"
+              v-if="getVideoSrc(video.video_url)"
+              :src="getVideoSrc(video.video_url)"
               class="w-full h-full"
               frameborder="0"
               allowfullscreen
@@ -323,6 +325,76 @@
       </div>
     </section>
 
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-white">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-gray-900 mb-4">Contact Us</h2>
+          <p class="text-xl text-gray-600">Have questions? We'd love to hear from you!</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+          <form @submit.prevent="submitContact">
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                <input
+                  v-model="contactForm.name"
+                  type="text"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Your name"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input
+                  v-model="contactForm.email"
+                  type="email"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Phone (Optional)</label>
+              <input
+                v-model="contactForm.phone"
+                type="tel"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Your phone number"
+              />
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+              <textarea
+                v-model="contactForm.message"
+                rows="5"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Your message..."
+                required
+              ></textarea>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="contactSending"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+            >
+              {{ contactSending ? 'Sending...' : 'Send Message' }}
+            </button>
+          </form>
+
+          <div v-if="contactSuccess" class="mt-4 p-4 bg-green-100 text-green-700 rounded-lg">
+            {{ contactSuccess }}
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-12">
       <div class="max-w-6xl mx-auto px-4 text-center">
@@ -343,6 +415,30 @@ const props = defineProps({
   galleryImages: Array,
   videos: Array,
 })
+
+// Extract video src from URL or full iframe code
+function getVideoSrc(videoUrl) {
+  if (!videoUrl) return null
+
+  let src = videoUrl
+
+  // If it's a full iframe code, extract src
+  if (videoUrl.includes('<iframe')) {
+    const srcMatch = videoUrl.match(/src=["']([^"']+)["']/)
+    if (srcMatch && srcMatch[1]) {
+      src = srcMatch[1]
+    } else {
+      return null
+    }
+  }
+
+  // Convert YouTube URLs to use no-cookie domain to avoid X-Frame-Options issue
+  if (src.includes('youtube.com') && !src.includes('youtube-nocookie.com')) {
+    src = src.replace('youtube.com', 'youtube-nocookie.com')
+  }
+
+  return src
+}
 
 const form = useForm({
   time_slot_id: null,
@@ -422,6 +518,53 @@ async function submitBooking() {
   } catch (error) {
     loading.value = false
     console.error('Error submitting booking:', error)
+  }
+}
+
+// Contact form
+const contactForm = ref({
+  name: '',
+  email: '',
+  phone: '',
+  message: ''
+})
+const contactSending = ref(false)
+const contactSuccess = ref('')
+
+async function submitContact() {
+  contactSending.value = true
+  contactSuccess.value = ''
+
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+    if (!csrfToken) {
+      alert('CSRF token not found. Please refresh the page.')
+      return
+    }
+
+    const response = await fetch('/contact', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+      },
+      body: JSON.stringify(contactForm.value)
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      contactSuccess.value = data.success || 'Thank you! Your message has been sent.'
+      contactForm.value = { name: '', email: '', phone: '', message: '' }
+    } else {
+      alert('Failed to send message. Please try again.')
+    }
+  } catch (error) {
+    console.error('Error submitting contact form:', error)
+    alert('Failed to send message. Please try again.')
+  } finally {
+    contactSending.value = false
   }
 }
 </script>

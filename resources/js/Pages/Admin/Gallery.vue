@@ -1,24 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100">
-    <nav class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <h1 class="text-xl font-bold text-gray-900">River Rafting Admin</h1>
-          </div>
-          <div class="flex items-center space-x-4">
-            <a href="/admin" class="text-gray-600 hover:text-gray-900">Dashboard</a>
-            <a href="/admin/bookings" class="text-gray-600 hover:text-gray-900">Bookings</a>
-            <a href="/admin/time-slots" class="text-gray-600 hover:text-gray-900">Time Slots</a>
-            <a href="/admin/testimonials" class="text-gray-600 hover:text-gray-900">Testimonials</a>
-            <a href="/admin/gallery" class="text-blue-600 font-medium">Gallery</a>
-            <form method="POST" action="/logout">
-              <button type="submit" class="text-red-600 hover:text-red-800">Logout</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <AdminNav current-page="gallery" />
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
@@ -49,21 +31,21 @@
                   <option value="videos">Videos</option>
                 </select>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+              <div v-if="form.category !== 'videos'">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
                 <input
-                  v-model="form.image_path"
-                  type="url"
-                  required
-                  placeholder="https://..."
+                  type="file"
+                  accept="image/*"
+                  @change="form.image_file = $event.target.files[0]"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
+                <p v-if="form.image_path" class="text-sm text-gray-500 mt-1">Current: {{ form.image_path }}</p>
               </div>
               <div v-if="form.category === 'videos'">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Video Embed URL</label>
                 <input
                   v-model="form.video_url"
-                  type="url"
+                  type="text"
                   placeholder="https://www.youtube.com/embed/..."
                   class="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
@@ -94,8 +76,8 @@
           <div v-for="item in galleryImages" :key="item.id" class="bg-white rounded-lg shadow overflow-hidden">
             <div class="aspect-square bg-gray-200">
               <img
-                v-if="item.image_path"
-                :src="item.image_path"
+                v-if="item.image_url"
+                :src="item.image_url"
                 :alt="item.title"
                 class="w-full h-full object-cover"
               />
@@ -113,6 +95,8 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3'
+import axios from 'axios'
+import AdminNav from '@/Components/AdminNav.vue'
 
 const props = defineProps({
   galleryImages: Array,
@@ -120,6 +104,7 @@ const props = defineProps({
 
 const form = useForm({
   title: '',
+  image_file: null,
   image_path: '',
   category: 'photos',
   video_url: '',
@@ -128,10 +113,42 @@ const form = useForm({
 })
 
 function submitForm() {
-  form.post('/admin/gallery', {
-    onSuccess: () => {
-      form.reset()
+  // For videos category, validate video_url is provided
+  if (form.category === 'videos' && !form.video_url) {
+    alert('Please enter a video embed URL for videos category')
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('title', form.title)
+  formData.append('category', form.category)
+  formData.append('video_url', form.video_url)
+  formData.append('sort_order', form.sort_order)
+  formData.append('is_active', form.is_active ? '1' : '0')
+
+  if (form.image_file) {
+    formData.append('image_file', form.image_file)
+  }
+
+  if (form.image_path) {
+    formData.append('image_path', form.image_path)
+  }
+
+  axios.post('/admin/gallery', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
     }
+  }).then(() => {
+    form.title = ''
+    form.image_file = null
+    form.image_path = ''
+    form.category = 'photos'
+    form.video_url = ''
+    form.sort_order = 0
+    form.is_active = true
+  }).catch((error) => {
+    console.error('Error:', error)
+    alert('Error: ' + (error.response?.data?.message || error.message))
   })
 }
 </script>

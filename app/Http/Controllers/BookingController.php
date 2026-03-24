@@ -16,9 +16,10 @@ class BookingController extends Controller
 {
     public function index()
     {
+
         $timeSlots = TimeSlot::where('is_active', true)->get();
         $testimonials = Testimonial::active()->take(6)->get();
-        $galleryImages = GalleryImage::active()->take(12)->get();
+        $galleryImages = GalleryImage::photos()->active()->take(12)->get();
         $videos = GalleryImage::videos()->active()->take(4)->get();
 
         return inertia('Booking/Index', [
@@ -50,6 +51,7 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request);
         $validated = $request->validate([
             'time_slot_id' => 'required|exists:time_slots,id',
             'booking_date' => 'required|date|after_or_equal:today',
@@ -94,7 +96,7 @@ class BookingController extends Controller
             'status' => $booking->payment_status,
         ]);
 
-        $qrCode = base64_encode(QrCode::format('png')->size(200)->generate($qrData));
+        $qrCode = base64_encode(QrCode::format('svg')->size(200)->generate($qrData));
         $booking->update(['qr_code' => $qrCode]);
 
         if ($validated['payment_method'] === 'online') {

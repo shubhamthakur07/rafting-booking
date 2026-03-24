@@ -1,24 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100">
-    <nav class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <h1 class="text-xl font-bold text-gray-900">River Rafting Admin</h1>
-          </div>
-          <div class="flex items-center space-x-4">
-            <a href="/admin" class="text-gray-600 hover:text-gray-900">Dashboard</a>
-            <a href="/admin/bookings" class="text-blue-600 font-medium">Bookings</a>
-            <a href="/admin/time-slots" class="text-gray-600 hover:text-gray-900">Time Slots</a>
-            <a href="/admin/testimonials" class="text-gray-600 hover:text-gray-900">Testimonials</a>
-            <a href="/admin/gallery" class="text-gray-600 hover:text-gray-900">Gallery</a>
-            <form method="POST" action="/logout">
-              <button type="submit" class="text-red-600 hover:text-red-800">Logout</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <AdminNav current-page="bookings" />
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
@@ -121,16 +103,20 @@
                   {{ booking.number_of_people }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span
+                  <select
+                    :value="booking.payment_status"
+                    @change="updatePaymentStatus(booking.id, $event.target.value)"
                     :class="[
-                      'px-2 py-1 text-xs font-semibold rounded-full',
+                      'pe-6 py-1 text-xs font-semibold rounded-full cursor-pointer border-0',
                       booking.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
                       booking.payment_status === 'at_site' ? 'bg-orange-100 text-orange-800' :
                       'bg-yellow-100 text-yellow-800'
                     ]"
                   >
-                    {{ booking.payment_status === 'paid' ? 'Paid' : booking.payment_status === 'at_site' ? 'Pay at Site' : 'Pending' }}
-                  </span>
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="at_site">Pay at Site</option>
+                  </select>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
@@ -189,6 +175,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import AdminNav from '@/Components/AdminNav.vue'
 
 const props = defineProps({
   bookings: Object,
@@ -313,6 +300,49 @@ async function complete(reference) {
     }
   } catch (error) {
     console.error('Error:', error)
+  }
+}
+
+const getCsrfToken = () => {
+  const meta = document.querySelector('meta[name="csrf-token"]')
+  return meta ? meta.content : ''
+}
+
+async function updatePaymentStatus(bookingId, newStatus) {
+  const csrfToken = getCsrfToken()
+  if (!csrfToken) {
+    errorMessage.value = 'Security token not found. Please refresh the page.'
+    return
+  }
+
+  try {
+    const response = await fetch('/admin/update-payment-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken
+      },
+      body: JSON.stringify({ booking_id: bookingId, payment_status: newStatus })
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      successMessage.value = data.message || 'Payment status updated successfully'
+      setTimeout(() => {
+        successMessage.value = ''
+      }, 3000)
+      // Reload page to show updated status
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+    }
+  } catch (error) {
+    console.error('Error:', error)
+    errorMessage.value = 'Failed to update payment status'
+    setTimeout(() => {
+      errorMessage.value = ''
+    }, 3000)
   }
 }
 </script>

@@ -80,7 +80,7 @@
               <p class="text-sm text-gray-600 mb-4">Show this QR code when you arrive at the rafting site</p>
               <div class="inline-block bg-white p-4 rounded-lg border border-gray-200">
                 <img
-                  :src="'data:image/png;base64,' + booking.qr_code"
+                  :src="'data:image/svg+xml;base64,' + booking.qr_code"
                   alt="QR Code"
                   class="w-48 h-48"
                 />

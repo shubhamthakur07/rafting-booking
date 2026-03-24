@@ -1,9 +1,13 @@
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
+        Options -MultiViews -Indexes +FollowSymlinks
     </IfModule>
 
     RewriteEngine On
+
+    # Allow direct access to storage directory
+    RewriteCond %{REQUEST_URI} ^/storage/ [NC]
+    RewriteRule ^ - [L]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -11,7 +15,7 @@
 
     # Handle X-XSRF-Token Header
     RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X_XSRF-Token}]
 
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d

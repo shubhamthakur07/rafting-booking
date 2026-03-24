@@ -9,13 +9,14 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.2",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "stripe/stripe-php": "^19.4",
+        "symfony/var-dumper": "8.1.x-dev",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\TimeSlot;
 use App\Models\Testimonial;
 use App\Models\GalleryImage;
+use App\Models\Contact;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -32,7 +33,9 @@ class AdminController extends Controller
     }
 
     public function bookings(Request $request)
+
     {
+        dd($request);
         $query = Booking::with('timeSlot')->orderBy('booking_date', 'desc');
 
         if ($request->has('status') && $request->status !== 'all') {
@@ -112,15 +115,78 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
-            'image_path' => 'required|string',
+            'image_file' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
+            'image_path' => 'nullable|string',
             'category' => 'nullable|in:photos,videos',
             'video_url' => 'nullable|string',
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);
 
-        GalleryImage::create($validated);
+        // Handle file upload
+        $imagePath = $validated['image_path'] ?? '';
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('gallery', $filename, 'public');
+            // Store just the filename for use with our custom route
+            $imagePath = $filename;
+        }
+
+        GalleryImage::create([
+            'title' => $validated['title'],
+            'image_path' => $imagePath,
+            'category' => $validated['category'] ?? 'photos',
+            'video_url' => $validated['video_url'] ?? '',
+            'is_active' => $validated['is_active'] ?? true,
+            'sort_order' => $validated['sort_order'] ?? 0,
+        ]);
 
         return back()->with('success', 'Gallery item created successfully!');
+    }
+
+    public function updatePaymentStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'booking_id' => 'required|exists:bookings,id',
+            'payment_status' => 'required|in:pending,paid,at_site',
+        ]);
+
+        $booking = Booking::findOrFail($validated['booking_id']);
+        $booking->update(['payment_status' => $validated['payment_status']]);
+
+        return response()->json(['success' => true, 'message' => 'Payment status updated successfully']);
+    }
+
+    public function contacts(Request $request)
+    {
+        $contacts = Contact::orderBy('created_at', 'desc')->get();
+
+        return inertia('Admin/Contacts', [
+            'contacts' => $contacts,
+        ]);
+    }
+
+    public function markContactRead(Request $request)
+    {
+        $validated = $request->validate([
+            'contact_id' => 'required|exists:contacts,id',
+        ]);
+
+        $contact = Contact::findOrFail($validated['contact_id']);
+        $contact->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteContact(Request $request)
+    {
+        $validated = $request->validate([
+            'contact_id' => 'required|exists:contacts,id',
+        ]);
+
+        Contact::findOrFail($validated['contact_id'])->delete();
+
+        return response()->json(['success' => true, 'message' => 'Contact deleted successfully']);
     }
 }
