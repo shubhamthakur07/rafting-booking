@@ -35,7 +35,6 @@ class AdminController extends Controller
     public function bookings(Request $request)
 
     {
-        dd($request);
         $query = Booking::with('timeSlot')->orderBy('booking_date', 'desc');
 
         if ($request->has('status') && $request->status !== 'all') {
@@ -102,6 +101,28 @@ class AdminController extends Controller
         return back()->with('success', 'Testimonial created successfully!');
     }
 
+    public function updateTestimonial(Request $request, Testimonial $testimonial)
+    {
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_avatar' => 'nullable|string',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'required|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $testimonial->update($validated);
+
+        return back()->with('success', 'Testimonial updated successfully!');
+    }
+
+    public function deleteTestimonial(Testimonial $testimonial)
+    {
+        $testimonial->delete();
+
+        return back()->with('success', 'Testimonial deleted successfully!');
+    }
+
     public function gallery(Request $request)
     {
         $galleryImages = GalleryImage::orderBy('sort_order')->get();
@@ -143,6 +164,46 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Gallery item created successfully!');
+    }
+
+    public function updateGalleryImage(Request $request, GalleryImage $galleryImage)
+    {
+        $validated = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'image_file' => 'nullable|image|mimes:jpeg,png,gif,webp|max:2048',
+            'image_path' => 'nullable|string',
+            'category' => 'nullable|in:photos,videos',
+            'video_url' => 'nullable|string',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer|min:0',
+        ]);
+
+        // Handle file upload
+        $imagePath = $galleryImage->image_path;
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('gallery', $filename, 'public');
+            $imagePath = $filename;
+        }
+
+        $galleryImage->update([
+            'title' => $validated['title'],
+            'image_path' => $imagePath,
+            'category' => $validated['category'] ?? 'photos',
+            'video_url' => $validated['video_url'] ?? '',
+            'is_active' => $validated['is_active'] ?? true,
+            'sort_order' => $validated['sort_order'] ?? 0,
+        ]);
+
+        return back()->with('success', 'Gallery item updated successfully!');
+    }
+
+    public function deleteGalleryImage(GalleryImage $galleryImage)
+    {
+        $galleryImage->delete();
+
+        return back()->with('success', 'Gallery item deleted successfully!');
     }
 
     public function updatePaymentStatus(Request $request)

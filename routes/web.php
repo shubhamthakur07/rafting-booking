@@ -40,8 +40,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/time-slots', [AdminController::class, 'storeTimeSlot'])->name('admin.time-slots.store');
     Route::get('/admin/testimonials', [AdminController::class, 'testimonials'])->name('admin.testimonials');
     Route::post('/admin/testimonials', [AdminController::class, 'storeTestimonial'])->name('admin.testimonials.store');
+    Route::put('/admin/testimonials/{testimonial}', [AdminController::class, 'updateTestimonial'])->name('admin.testimonials.update');
+    Route::delete('/admin/testimonials/{testimonial}', [AdminController::class, 'deleteTestimonial'])->name('admin.testimonials.destroy');
     Route::get('/admin/gallery', [AdminController::class, 'gallery'])->name('admin.gallery');
     Route::post('/admin/gallery', [AdminController::class, 'storeGalleryImage'])->name('admin.gallery.store');
+    Route::put('/admin/gallery/{galleryImage}', [AdminController::class, 'updateGalleryImage'])->name('admin.gallery.update');
+    Route::delete('/admin/gallery/{galleryImage}', [AdminController::class, 'deleteGalleryImage'])->name('admin.gallery.destroy');
     Route::get('/admin/contacts', [AdminController::class, 'contacts'])->name('admin.contacts');
     Route::post('/admin/contacts/mark-read', [AdminController::class, 'markContactRead'])->name('admin.contacts.mark-read');
     Route::post('/admin/contacts/delete', [AdminController::class, 'deleteContact'])->name('admin.contacts.delete');
