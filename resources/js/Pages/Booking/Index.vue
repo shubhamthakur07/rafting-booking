@@ -259,13 +259,15 @@
           <div
             v-for="(image, index) in galleryImages"
             :key="index"
-            class="aspect-square overflow-hidden rounded-lg cursor-pointer group"
+            class="aspect-square  rounded-lg cursor-pointer group"
           >
             <img
               :src="image.image_url"
               :alt="image.title"
               class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
+
+            <p class=" py-5 ">{{image.title}}</p>
 
           </div>
         </div>
@@ -283,7 +285,7 @@
           <div
             v-for="(video, index) in videos"
             :key="index"
-            class="aspect-video rounded-lg overflow-hidden bg-gray-800"
+            class="aspect-video rounded-lg bg-gray-800"
           >
             <iframe
               v-if="getVideoSrc(video.video_url)"
@@ -292,6 +294,8 @@
               frameborder="0"
               allowfullscreen
             ></iframe>
+             <p class=" py-5 ">{{video.title}}</p>
+
           </div>
         </div>
       </div>
