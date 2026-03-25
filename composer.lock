@@ -3553,7 +3553,6 @@
             },
             "require": {
                 "bacon/bacon-qr-code": "^2.0",
-                "ext-gd": "*",
                 "php": ">=7.2|^8.0"
             },
             "require-dev": {
@@ -9603,8 +9602,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.2",
-        "ext-gd": "*"
+        "php": "^8.4"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"
