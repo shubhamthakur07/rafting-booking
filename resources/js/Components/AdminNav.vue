@@ -1,0 +1,61 @@
+<template>
+  <nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-bold text-gray-900">River Rafting Admin</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a
+            href="/admin"
+            :class="[
+              currentPage === 'dashboard' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
+            ]"
+          >Dashboard</a>
+          <a
+            href="/admin/bookings"
+            :class="[
+              currentPage === 'bookings' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
+            ]"
+          >Bookings</a>
+          <a
+            href="/admin/time-slots"
+            :class="[
+              currentPage === 'time-slots' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
+            ]"
+          >Time Slots</a>
+          <a
+            href="/admin/testimonials"
+            :class="[
+              currentPage === 'testimonials' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
+            ]"
+          >Testimonials</a>
+          <a
+            href="/admin/gallery"
+            :class="[
+              currentPage === 'gallery' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
+            ]"
+          >Gallery</a>
+          <a
+            href="/admin/contacts"
+            :class="[
+              currentPage === 'contacts' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
+            ]"
+          >Contacts</a>
+          <form method="POST" action="/logout">
+            <button type="submit" class="text-red-600 hover:text-red-800">Logout</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </nav>
+</template>
+
+<script setup>
+defineProps({
+  currentPage: {
+    type: String,
+    default: 'dashboard'
+  }
+})
+</script>
