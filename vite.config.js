@@ -17,4 +17,10 @@ export default defineConfig({
             },
         }),
     ],
+     server: {
+        https: true,
+        hmr: {
+            host: 'efficient-miracle-production.up.railway.app',
+        },
+    },
 });
