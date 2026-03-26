@@ -5,7 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'River Rafting Adventure') }}</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="/storage/LOGO/SiteLogo.png">
+        <link rel="apple-touch-icon" href="/storage/LOGO/SiteLogo.png">
+        <meta name="theme-color" content="#ffffff">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -20,3 +25,4 @@
         @inertia
     </body>
 </html>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>

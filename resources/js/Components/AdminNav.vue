@@ -3,6 +3,14 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex items-center">
+          <a href="/" class="flex items-center">
+            <img
+              src="/logo.png"
+              alt="Logo"
+              class="h-10 w-auto mr-3"
+              @error="$event.target.style.display='none'"
+            />
+          </a>
           <h1 class="text-xl font-bold text-gray-900">River Rafting Admin</h1>
         </div>
         <div class="flex items-center space-x-4">

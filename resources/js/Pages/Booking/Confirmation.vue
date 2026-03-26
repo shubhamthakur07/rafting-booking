@@ -54,7 +54,7 @@
             </div>
             <div>
               <div class="text-sm text-gray-500 mb-1">Total Price</div>
-              <div class="font-semibold text-lg text-green-600">${{ parseFloat(booking.total_price).toFixed(2) }}</div>
+              <div class="font-semibold text-lg text-green-600">₹{{ parseFloat(booking.total_price).toFixed(2) }}</div>
             </div>
           </div>
 
@@ -102,7 +102,7 @@
           <div class="ml-3">
             <h3 class="text-lg font-semibold text-orange-800">Pay at Site</h3>
             <p class="text-orange-700 mt-1">
-              Please pay <strong>${{ parseFloat(booking.total_price).toFixed(2) }}</strong> when you arrive at the rafting site.
+              Please pay <strong>₹{{ parseFloat(booking.total_price).toFixed(2) }}</strong> when you arrive at the rafting site.
               Show your QR code ticket above for check-in.
             </p>
           </div>

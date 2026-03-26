@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
-
+use Razorpay\Api\Api;
 class BookingController extends Controller
 {
     public function index()
@@ -49,88 +49,178 @@ class BookingController extends Controller
         return response()->json($timeSlots);
     }
 
-    public function store(Request $request)
-    {
-        // dd($request);
-        $validated = $request->validate([
-            'time_slot_id' => 'required|exists:time_slots,id',
-            'booking_date' => 'required|date|after_or_equal:today',
-            'customer_name' => 'required|string|max:255',
-            'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'required|string|max:20',
-            'number_of_people' => 'required|integer|min:1|max:20',
-            'payment_method' => 'required|in:online,at_site',
-            'notes' => 'nullable|string',
-        ]);
+//   public function store(Request $request)
+// {
+//     $validated = $request->validate([
+//         'time_slot_id' => 'required|exists:time_slots,id',
+//         'booking_date' => 'required|date|after_or_equal:today',
+//         'customer_name' => 'required|string|max:255',
+//         'customer_email' => 'required|email|max:255',
+//         'customer_phone' => 'required|string|max:20',
+//         'number_of_people' => 'required|integer|min:1|max:20',
+//         'payment_method' => 'required|in:online,at_site',
+//         'notes' => 'nullable|string',
+//     ]);
 
-        $timeSlot = TimeSlot::findOrFail($validated['time_slot_id']);
+//     $timeSlot = TimeSlot::findOrFail($validated['time_slot_id']);
 
-        // Check availability
-        if (!$timeSlot->isAvailableForDate($validated['booking_date'], $validated['number_of_people'])) {
-            return back()->withErrors(['error' => 'Not enough slots available for this date.']);
+//     // Check availability
+//     if (!$timeSlot->isAvailableForDate($validated['booking_date'], $validated['number_of_people'])) {
+//         // For AJAX requests, return a 422 JSON error
+//         if ($request->wantsJson()) {
+//             return response()->json(['message' => 'Not enough slots available.'], 422);
+//         }
+//         return back()->withErrors(['error' => 'Not enough slots available for this date.']);
+//     }
+
+//     $totalPrice = $timeSlot->price * $validated['number_of_people'];
+
+//     $booking = Booking::create([
+//         'time_slot_id' => $validated['time_slot_id'],
+//         'booking_date' => $validated['booking_date'],
+//         'customer_name' => $validated['customer_name'],
+//         'customer_email' => $validated['customer_email'],
+//         'customer_phone' => $validated['customer_phone'],
+//         'number_of_people' => $validated['number_of_people'],
+//         'total_price' => $totalPrice,
+//         'payment_status' => $validated['payment_method'] === 'online' ? 'pending' : 'at_site',
+//         'booking_status' => 'confirmed',
+//         'notes' => $validated['notes'] ?? null,
+//     ]);
+
+//     // QR Code Generation logic...
+//     $qrData = json_encode([
+//         'ref' => $booking->booking_reference,
+//         'date' => $booking->booking_date->format('Y-m-d'),
+//         'time' => $timeSlot->start_time,
+//         'people' => $booking->number_of_people,
+//         'status' => $booking->payment_status,
+//     ]);
+//     $qrCode = base64_encode(QrCode::format('svg')->size(200)->generate($qrData));
+//     $booking->update(['qr_code' => $qrCode]);
+
+//     if ($validated['payment_method'] === 'online') {
+//         Stripe::setApiKey(config('services.stripe.secret'));
+
+//         $session = Session::create([
+//             'payment_method_types' => ['card'],
+//             'line_items' => [[
+//                 'price_data' => [
+//                     'currency' => 'inr',
+//                     'product_data' => [
+//                         'name' => 'River Rafting - ' . $booking->booking_reference,
+//                     ],
+//                     'unit_amount' => (int)($totalPrice * 100),
+//                 ],
+//                 'quantity' => 1,
+//             ]],
+//             'mode' => 'payment',
+//             'success_url' => url('/booking/success/' . $booking->id),
+//             'cancel_url' => url('/booking/cancel/' . $booking->id),
+//         ]);
+
+//         // CHANGE THIS: Return JSON instead of a direct redirect
+//         if ($request->wantsJson()) {
+//             return response()->json(['url' => $session->url]);
+//         }
+
+//         return redirect($session->url);
+//     }
+
+//     // For pay at site
+//     if ($request->wantsJson()) {
+//         return response()->json(['url' => route('booking.confirmation', $booking->id)]);
+//     }
+
+//     return redirect()->route('booking.confirmation', $booking->id);
+// }
+
+   public function store(Request $request)
+{
+    // ... (Keep your validation and Booking::create logic the same) ...
+
+      $validated = $request->validate([
+        'time_slot_id' => 'required|exists:time_slots,id',
+        'booking_date' => 'required|date|after_or_equal:today',
+        'customer_name' => 'required|string|max:255',
+        'customer_email' => 'required|email|max:255',
+        'customer_phone' => 'required|string|max:20',
+        'number_of_people' => 'required|integer|min:1|max:20',
+        'payment_method' => 'required|in:online,at_site',
+        'notes' => 'nullable|string',
+    ]);
+
+    $timeSlot = TimeSlot::findOrFail($validated['time_slot_id']);
+
+    // Check availability
+    if (!$timeSlot->isAvailableForDate($validated['booking_date'], $validated['number_of_people'])) {
+        // For AJAX requests, return a 422 JSON error
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Not enough slots available.'], 422);
         }
-
-        // Calculate total price
-        $totalPrice = $timeSlot->price * $validated['number_of_people'];
-
-        // Create booking
-        $booking = Booking::create([
-            'time_slot_id' => $validated['time_slot_id'],
-            'booking_date' => $validated['booking_date'],
-            'customer_name' => $validated['customer_name'],
-            'customer_email' => $validated['customer_email'],
-            'customer_phone' => $validated['customer_phone'],
-            'number_of_people' => $validated['number_of_people'],
-            'total_price' => $totalPrice,
-            'payment_status' => $validated['payment_method'] === 'online' ? 'pending' : 'at_site',
-            'booking_status' => 'confirmed',
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        // Generate QR code
-        $qrData = json_encode([
-            'ref' => $booking->booking_reference,
-            'date' => $booking->booking_date->format('Y-m-d'),
-            'time' => $timeSlot->start_time,
-            'people' => $booking->number_of_people,
-            'status' => $booking->payment_status,
-        ]);
-
-        $qrCode = base64_encode(QrCode::format('svg')->size(200)->generate($qrData));
-        $booking->update(['qr_code' => $qrCode]);
-
-        if ($validated['payment_method'] === 'online') {
-            // Create Stripe checkout session
-            Stripe::setApiKey(config('services.stripe.secret'));
-
-            $session = Session::create([
-                'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'usd',
-                        'product_data' => [
-                            'name' => 'River Rafting - ' . $booking->booking_reference,
-                            'description' => $booking->number_of_people . ' person(s) on ' . $booking->booking_date->format('M d, Y'),
-                        ],
-                        'unit_amount' => (int)($totalPrice * 100),
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'success_url' => url('/booking/success/' . $booking->id),
-                'cancel_url' => url('/booking/cancel/' . $booking->id),
-                'metadata' => [
-                    'booking_id' => $booking->id,
-                    'booking_reference' => $booking->booking_reference,
-                ],
-            ]);
-
-            return redirect($session->url);
-        }
-
-        // For pay at site, show success page directly
-        return redirect()->route('booking.confirmation', $booking->id);
+        return back()->withErrors(['error' => 'Not enough slots available for this date.']);
     }
+
+    $totalPrice = $timeSlot->price * $validated['number_of_people'];
+
+    $booking = Booking::create([
+        'time_slot_id' => $validated['time_slot_id'],
+        'booking_date' => $validated['booking_date'],
+        'customer_name' => $validated['customer_name'],
+        'customer_email' => $validated['customer_email'],
+        'customer_phone' => $validated['customer_phone'],
+        'number_of_people' => $validated['number_of_people'],
+        'total_price' => $totalPrice,
+        'payment_status' => $validated['payment_method'] === 'online' ? 'pending' : 'at_site',
+        'booking_status' => 'confirmed',
+        'notes' => $validated['notes'] ?? null,
+    ]);
+
+    // QR Code Generation logic...
+    $qrData = json_encode([
+        'ref' => $booking->booking_reference,
+        'date' => $booking->booking_date->format('Y-m-d'),
+        'time' => $timeSlot->start_time,
+        'people' => $booking->number_of_people,
+        'status' => $booking->payment_status,
+    ]);
+    $qrCode = base64_encode(QrCode::format('svg')->size(200)->generate($qrData));
+    $booking->update(['qr_code' => $qrCode]);
+
+    if ($validated['payment_method'] === 'online') {
+        $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
+
+        // Create Razorpay Order
+        $orderData = [
+            'receipt'         => (string) $booking->id,
+            'amount'          => $totalPrice * 100, // Amount in paise (₹1 = 100 paise)
+            'currency'        => 'INR',
+            'payment_capture' => 1 // Auto-capture payment
+        ];
+
+        $razorpayOrder = $api->order->create($orderData);
+
+        // Save the order_id to your booking record
+        $booking->update(['razorpay_order_id' => $razorpayOrder['id']]);
+
+        return response()->json([
+            'payment_type' => 'razorpay',
+            'amount' => $orderData['amount'],
+            'order_id' => $razorpayOrder['id'],
+            'key' => env('RAZORPAY_KEY'),
+            'name' => $booking->customer_name,
+            'email' => $booking->customer_email,
+            'phone' => $booking->customer_phone,
+            'booking_id' => $booking->id
+        ]);
+    }
+
+    // For 'at_site' payment, return booking_id for redirect
+    return response()->json([
+        'payment_type' => 'at_site',
+        'booking_id' => $booking->id
+    ]);
+}
 
     public function success(Booking $booking)
     {
