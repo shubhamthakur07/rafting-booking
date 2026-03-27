@@ -50,8 +50,28 @@
               currentPage === 'contacts' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
             ]"
           >Contacts</a>
+          <a
+            href="/admin/packages"
+            :class="[
+              currentPage === 'packages' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
+            ]"
+          >Packages</a>
+          <a
+            href="/admin/settings"
+            :class="[
+              currentPage === 'settings' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'
+            ]"
+          >Map</a>
           <form method="POST" action="/logout">
-            <button type="submit" class="text-red-600 hover:text-red-800">Logout</button>
+                        <Link
+                            href="/logout"
+                            method="post"
+                            as="button"
+                            class="text-red-600 hover:text-red-800"
+                        >
+                            Logout
+                        </Link>
+
           </form>
         </div>
       </div>
@@ -60,6 +80,7 @@
 </template>
 
 <script setup>
+import { Link } from '@inertiajs/vue3'
 defineProps({
   currentPage: {
     type: String,

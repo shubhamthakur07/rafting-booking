@@ -19,7 +19,7 @@
           />
         </div>
         <h1 class="text-3xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 tracking-tight">
-          River Rafting Himachal
+          River rafting kullu manali
         </h1>
         <p class="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 text-blue-100">
           Experience the thrill of a lifetime! Book your adventure today.
@@ -91,8 +91,31 @@
               />
             </div>
 
-            <!-- Time Slots -->
+            <!-- Package Selection -->
             <div v-if="form.booking_date" class="mb-6 md:mb-8">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Select Package</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+                <button
+                  v-for="pkg in packages"
+                  :key="pkg.id"
+                  type="button"
+                  @click="selectPackage(pkg)"
+                  :class="[
+                    'p-3 md:p-4 border-2 rounded-lg transition-all text-left',
+                    selectedPackage?.id === pkg.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300'
+                  ]"
+                >
+                  <div class="font-semibold text-sm md:text-base">{{ pkg.name }}</div>
+                  <div class="text-sm text-gray-600">{{ pkg.km }} km</div>
+                  <div class="text-sm font-bold text-blue-600">₹{{ pkg.price }} / person</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Time Slots -->
+            <div v-if="selectedPackage" class="mb-6 md:mb-8">
               <label class="block text-sm font-medium text-gray-700 mb-2">Select Time Slot</label>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                 <button
@@ -111,7 +134,6 @@
                   ]"
                 >
                   <div class="font-semibold text-sm md:text-base">{{ formatTime(slot.start_time) }}</div>
-                  <div class="text-sm text-gray-600">₹{{ slot.price }} / person</div>
                   <div class="text-xs mt-1" :class="slot.available > 5 ? 'text-green-600' : 'text-orange-600'">
                     {{ slot.available }} spots left
                   </div>
@@ -234,7 +256,7 @@
             <!-- Price Summary -->
             <div v-if="selectedSlot" class="bg-gray-50 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
               <div class="flex justify-between items-center mb-2">
-                <span class="text-gray-600 text-sm md:text-base">{{ selectedSlot.price }} x {{ form.number_of_people }} people</span>
+                <span class="text-gray-600 text-sm md:text-base">{{ selectedPackage.name }} ({{ selectedPackage.km }} km) x {{ form.number_of_people }} people</span>
                 <span class="text-gray-900 text-sm md:text-base">₹{{ totalPrice.toFixed(2) }}</span>
               </div>
               <div class="flex justify-between items-center pt-2 border-t border-gray-200">
@@ -409,24 +431,22 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 md:py-12">
-      <div class="max-w-6xl mx-auto px-4 text-center">
-        <p class="text-base md:text-lg">© {{ new Date().getFullYear() }} River Rafting Adventure. All rights reserved.</p>
-        <p class="text-gray-400 mt-2 text-sm md:text-base">Admin? <a href="/login" class="text-blue-400 hover:underline">Login here</a></p>
-      </div>
-    </footer>
+    <Footer :googleMapEmbed="googleMapEmbed" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import Footer from '@/Components/Footer.vue'
 
 const props = defineProps({
   timeSlots: Array,
+  packages: Array,
   testimonials: Array,
   galleryImages: Array,
   videos: Array,
+  googleMapEmbed: String,
 })
 
 // Extract video src from URL or full iframe code
@@ -455,6 +475,7 @@ function getVideoSrc(videoUrl) {
 
 const form = useForm({
   time_slot_id: null,
+  package_id: null,
   booking_date: '',
   customer_name: '',
   customer_email: '',
@@ -467,6 +488,7 @@ const form = useForm({
 const loading = ref(false)
 const availableSlots = ref([])
 const selectedSlot = ref(null)
+const selectedPackage = ref(null)
 
 const minDate = computed(() => {
   const today = new Date()
@@ -474,25 +496,30 @@ const minDate = computed(() => {
 })
 
 const totalPrice = computed(() => {
-  if (!selectedSlot.value) return 0
-  return selectedSlot.value.price * form.number_of_people
+  if (!selectedPackage.value) return 0
+  return selectedPackage.value.price * form.number_of_people
 })
 
 const canSubmit = computed(() => {
   return selectedSlot.value &&
+         selectedPackage.value &&
          form.customer_name &&
          form.customer_email &&
          form.customer_phone &&
          form.number_of_people > 0
 })
 
-function formatTime(time) {
-  if (!time) return ''
-  const [hours, minutes] = time.split(':')
-  const hour = parseInt(hours)
-  const ampm = hour >= 12 ? 'PM' : 'AM'
-  const hour12 = hour % 12 || 12
-  return `${hour12}:${minutes} ${ampm}`
+function formatTime(timeString) {
+  if (!timeString) return '';
+
+  const timePart = timeString.split('T')[1].split('.')[0];
+
+  const [hours, minutes] = timePart.split(':');
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const hour12 = hour % 12 || 12;
+
+  return `${hour12}:${minutes} ${ampm}`;
 }
 
 async function loadAvailableSlots() {
@@ -512,6 +539,11 @@ function selectSlot(slot) {
   if (slot.available < 1) return
   selectedSlot.value = slot
   form.time_slot_id = slot.id
+}
+
+function selectPackage(pkg) {
+  selectedPackage.value = pkg
+  form.package_id = pkg.id
 }
 
 // for payment stripe

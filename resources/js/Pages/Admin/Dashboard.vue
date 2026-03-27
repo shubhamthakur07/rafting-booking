@@ -41,7 +41,7 @@
                 <div class="ml-5 w-0 flex-1">
                   <dl>
                     <dt class="text-sm font-medium text-gray-500 truncate">Monthly Revenue</dt>
-                    <dd class="text-3xl font-semibold text-gray-900">${{ totalRevenue }}</dd>
+                    <dd class="text-3xl font-semibold text-gray-900">₹{{ totalRevenue }}</dd>
                   </dl>
                 </div>
               </div>

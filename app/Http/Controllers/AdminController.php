@@ -7,6 +7,8 @@ use App\Models\TimeSlot;
 use App\Models\Testimonial;
 use App\Models\GalleryImage;
 use App\Models\Contact;
+use App\Models\Package;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -75,6 +77,28 @@ class AdminController extends Controller
         TimeSlot::create($validated);
 
         return back()->with('success', 'Time slot created successfully!');
+    }
+
+    public function updateTimeSlot(Request $request, TimeSlot $timeSlot)
+    {
+        $validated = $request->validate([
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'max_people' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'is_active' => 'boolean',
+        ]);
+
+        $timeSlot->update($validated);
+
+        return back()->with('success', 'Time slot updated successfully!');
+    }
+
+    public function deleteTimeSlot(TimeSlot $timeSlot)
+    {
+        $timeSlot->delete();
+
+        return back()->with('success', 'Time slot deleted successfully!');
     }
 
     public function testimonials(Request $request)
@@ -249,5 +273,73 @@ class AdminController extends Controller
         Contact::findOrFail($validated['contact_id'])->delete();
 
         return response()->json(['success' => true, 'message' => 'Contact deleted successfully']);
+    }
+
+    public function packages()
+    {
+        $packages = Package::orderBy('sort_order')->orderBy('km')->get();
+
+        return inertia('Admin/Packages', [
+            'packages' => $packages,
+        ]);
+    }
+
+    public function storePackage(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'km' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer|min:0',
+        ]);
+
+        Package::create($validated);
+
+        return back()->with('success', 'Package created successfully!');
+    }
+
+    public function updatePackage(Request $request, Package $package)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'km' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer|min:0',
+        ]);
+
+        $package->update($validated);
+
+        return back()->with('success', 'Package updated successfully!');
+    }
+
+    public function deletePackage(Package $package)
+    {
+        $package->delete();
+
+        return back()->with('success', 'Package deleted successfully!');
+    }
+
+    public function settings()
+    {
+        $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
+
+        return inertia('Admin/Settings', [
+            'googleMapEmbed' => $googleMapEmbed,
+        ]);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'google_map_embed' => 'nullable|string',
+        ]);
+
+        SiteSetting::setValue('google_map_embed', $validated['google_map_embed'] ?? '');
+
+        return back()->with('success', 'Settings updated successfully!');
     }
 }

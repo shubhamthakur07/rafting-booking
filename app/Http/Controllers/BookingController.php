@@ -6,6 +6,8 @@ use App\Models\Booking;
 use App\Models\TimeSlot;
 use App\Models\Testimonial;
 use App\Models\GalleryImage;
+use App\Models\Package;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -18,15 +20,19 @@ class BookingController extends Controller
     {
 
         $timeSlots = TimeSlot::where('is_active', true)->get();
+        $packages = Package::getActivePackages();
         $testimonials = Testimonial::active()->take(6)->get();
         $galleryImages = GalleryImage::photos()->active()->take(12)->get();
         $videos = GalleryImage::videos()->active()->take(4)->get();
+        $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
 
         return inertia('Booking/Index', [
             'timeSlots' => $timeSlots,
+            'packages' => $packages,
             'testimonials' => $testimonials,
             'galleryImages' => $galleryImages,
             'videos' => $videos,
+            'googleMapEmbed' => $googleMapEmbed,
         ]);
     }
 
@@ -141,6 +147,7 @@ class BookingController extends Controller
 
       $validated = $request->validate([
         'time_slot_id' => 'required|exists:time_slots,id',
+        'package_id' => 'required|exists:packages,id',
         'booking_date' => 'required|date|after_or_equal:today',
         'customer_name' => 'required|string|max:255',
         'customer_email' => 'required|email|max:255',
@@ -151,6 +158,7 @@ class BookingController extends Controller
     ]);
 
     $timeSlot = TimeSlot::findOrFail($validated['time_slot_id']);
+    $package = Package::findOrFail($validated['package_id']);
 
     // Check availability
     if (!$timeSlot->isAvailableForDate($validated['booking_date'], $validated['number_of_people'])) {
@@ -161,10 +169,11 @@ class BookingController extends Controller
         return back()->withErrors(['error' => 'Not enough slots available for this date.']);
     }
 
-    $totalPrice = $timeSlot->price * $validated['number_of_people'];
+    $totalPrice = $package->price * $validated['number_of_people'];
 
     $booking = Booking::create([
         'time_slot_id' => $validated['time_slot_id'],
+        'package_id' => $validated['package_id'],
         'booking_date' => $validated['booking_date'],
         'customer_name' => $validated['customer_name'],
         'customer_email' => $validated['customer_email'],

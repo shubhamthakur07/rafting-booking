@@ -38,6 +38,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/admin/update-payment-status', [AdminController::class, 'updatePaymentStatus'])->name('admin.update-payment-status');
     Route::get('/admin/time-slots', [AdminController::class, 'timeSlots'])->name('admin.time-slots');
     Route::post('/admin/time-slots', [AdminController::class, 'storeTimeSlot'])->name('admin.time-slots.store');
+    Route::put('/admin/time-slots/{timeSlot}', [AdminController::class, 'updateTimeSlot'])->name('admin.time-slots.update');
+    Route::delete('/admin/time-slots/{timeSlot}', [AdminController::class, 'deleteTimeSlot'])->name('admin.time-slots.destroy');
     Route::get('/admin/testimonials', [AdminController::class, 'testimonials'])->name('admin.testimonials');
     Route::post('/admin/testimonials', [AdminController::class, 'storeTestimonial'])->name('admin.testimonials.store');
     Route::put('/admin/testimonials/{testimonial}', [AdminController::class, 'updateTestimonial'])->name('admin.testimonials.update');
@@ -49,11 +51,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin/contacts', [AdminController::class, 'contacts'])->name('admin.contacts');
     Route::post('/admin/contacts/mark-read', [AdminController::class, 'markContactRead'])->name('admin.contacts.mark-read');
     Route::post('/admin/contacts/delete', [AdminController::class, 'deleteContact'])->name('admin.contacts.delete');
+    Route::get('/admin/packages', [AdminController::class, 'packages'])->name('admin.packages');
+    Route::post('/admin/packages', [AdminController::class, 'storePackage'])->name('admin.packages.store');
+    Route::put('/admin/packages/{package}', [AdminController::class, 'updatePackage'])->name('admin.packages.update');
+    Route::delete('/admin/packages/{package}', [AdminController::class, 'deletePackage'])->name('admin.packages.destroy');
+    Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
+    Route::post('/admin/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Admin/Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -61,4 +69,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

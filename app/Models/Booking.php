@@ -14,6 +14,7 @@ class Booking extends Model
     protected $fillable = [
         'booking_reference',
         'time_slot_id',
+        'package_id',
         'booking_date',
         'customer_name',
         'customer_email',
@@ -46,6 +47,11 @@ class Booking extends Model
     public function timeSlot(): BelongsTo
     {
         return $this->belongsTo(TimeSlot::class);
+    }
+
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
     }
 
     public function scopeConfirmed($query)
