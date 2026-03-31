@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('number_of_people');
             $table->decimal('total_price', 10, 2);
             $table->enum('payment_status', ['pending', 'paid', 'at_site'])->default('pending');
-            $table->enum('booking_status', ['confirmed', 'checked_in', 'completed', 'cancelled'])->default('confirmed');
+            $table->enum('booking_status', ['pending', 'confirmed', 'completed', 'cancelled'])->default('pending');
             $table->string('qr_code')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

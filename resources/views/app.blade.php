@@ -20,9 +20,9 @@
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     </head>
     <body class="font-sans antialiased">
         @inertia
     </body>
 </html>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>

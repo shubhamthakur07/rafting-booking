@@ -6,67 +6,12 @@
       <div class="px-4 py-6 sm:px-0">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold text-gray-900">Time Slots</h2>
-        </div>
-
-        <!-- Success Message -->
-        <div v-if="$page.props.flash?.success" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-          {{ $page.props.flash.success }}
-        </div>
-
-        <!-- Add Time Slot Form -->
-        <div class="bg-white rounded-lg shadow mb-6 p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Add New Time Slot</h3>
-          <form @submit.prevent="submitForm">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                <input
-                  v-model="form.start_time"
-                  type="time"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                <input
-                  v-model="form.end_time"
-                  type="time"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Max People</label>
-                <input
-                  v-model="form.max_people"
-                  type="number"
-                  min="1"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-              <!-- <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
-                <input
-                  v-model="form.price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                />
-              </div> -->
-              <div class="flex items-end">
-                <button
-                  type="submit"
-                  class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                >
-                  Add Slot
-                </button>
-              </div>
-            </div>
-          </form>
+          <button
+            @click="showCreateModal = true"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            Add Time Slot
+          </button>
         </div>
 
         <!-- Time Slots Table -->
@@ -74,34 +19,42 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start Time</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Time</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Max People</th>
-                <!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th> -->
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Time</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max People</th>
+                <!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th> -->
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="slot in timeSlots" :key="slot.id">
-                <td class="px-6 py-4">{{ slot.start_time }}</td>
-                <td class="px-6 py-4">{{ slot.end_time }}</td>
-                <td class="px-6 py-4">{{ slot.max_people }}</td>
-                <!-- <td class="px-6 py-4">₹{{ slot.price }}</td> -->
-                <td class="px-6 py-4">
-                  <span :class="slot.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'" class="px-2 py-1 text-xs rounded-full">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ slot.start_time }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ slot.end_time }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {{ slot.max_people }}
+                </td>
+                <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ₹{{ slot.price }}
+                </td> -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span :class="slot.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-1 text-xs font-medium rounded-full">
                     {{ slot.is_active ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
-                    @click="editTimeSlot(slot)"
+                    @click="editSlot(slot)"
                     class="text-blue-600 hover:text-blue-900 mr-3"
                   >
                     Edit
                   </button>
                   <button
-                    @click="deleteTimeSlot(slot.id)"
+                    @click="deleteSlot(slot.id)"
                     class="text-red-600 hover:text-red-900"
                   >
                     Delete
@@ -111,149 +64,147 @@
             </tbody>
           </table>
         </div>
-
-        <!-- Edit Modal -->
-        <div v-if="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-              <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Time Slot</h3>
-              <form @submit.prevent="updateTimeSlot">
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-                  <input
-                    v-model="editForm.start_time"
-                    type="time"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-                  <input
-                    v-model="editForm.end_time"
-                    type="time"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Max People</label>
-                  <input
-                    v-model="editForm.max_people"
-                    type="number"
-                    min="1"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div>
-                <!-- <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
-                  <input
-                    v-model="editForm.price"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
-                </div> -->
-                <div class="mb-4">
-                  <label class="flex items-center">
-                    <input
-                      v-model="editForm.is_active"
-                      type="checkbox"
-                      class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                    />
-                    <span class="ml-2 text-sm text-gray-600">Active</span>
-                  </label>
-                </div>
-                <div class="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    @click="closeEditModal"
-                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Update
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
       </div>
     </main>
+
+    <!-- Create/Edit Modal -->
+    <Modal :show="showCreateModal || showEditModal" @close="closeModal">
+      <div class="p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+          {{ showEditModal ? 'Edit Time Slot' : 'Create Time Slot' }}
+        </h3>
+        <form @submit.prevent="submitForm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+              <input
+                type="time"
+                v-model="form.start_time"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+              <input
+                type="time"
+                v-model="form.end_time"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Max People</label>
+              <input
+                type="number"
+                v-model="form.max_people"
+                min="1"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+            <!-- <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+              <input
+                type="number"
+                v-model="form.price"
+                min="0"
+                step="0.01"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div> -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select v-model="form.is_active" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                <option :value="true">Active</option>
+                <option :value="false">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button
+              type="button"
+              @click="closeModal"
+              class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
+              {{ showEditModal ? 'Update' : 'Create' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { router } from '@inertiajs/vue3'
 import AdminNav from '@/Components/AdminNav.vue'
-import { useForm, router } from '@inertiajs/vue3'
+import Modal from '@/Components/Modal.vue'
 
 const props = defineProps({
-  timeSlots: Array,
+  timeSlots: Array
 })
 
-const form = useForm({
-  start_time: '',
-  end_time: '',
-  max_people: 20,
-  price: 50,
-  is_active: true,
-})
-
+const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const editingSlot = ref(null)
 
-const editForm = useForm({
+const form = ref({
   start_time: '',
   end_time: '',
   max_people: 20,
-  price: 50,
-  is_active: true,
+  price: '1',
+  is_active: true
 })
 
-function submitForm() {
-  form.post('/admin/time-slots', {
-    onSuccess: () => {
-      form.reset()
-    }
-  })
-}
-
-function editTimeSlot(slot) {
+function editSlot(slot) {
   editingSlot.value = slot
-  editForm.start_time = slot.start_time
-  editForm.end_time = slot.end_time
-  editForm.max_people = slot.max_people
-  editForm.price = slot.price
-  editForm.is_active = slot.is_active
+  form.value = {
+    start_time: slot.start_time,
+    end_time: slot.end_time,
+    max_people: slot.max_people,
+    price: slot.price,
+    is_active: slot.is_active
+  }
   showEditModal.value = true
 }
 
-function closeEditModal() {
+function closeModal() {
+  showCreateModal.value = false
   showEditModal.value = false
   editingSlot.value = null
-  editForm.reset()
+  form.value = {
+    start_time: '',
+    end_time: '',
+    max_people: 20,
+    price: '',
+    is_active: true
+  }
 }
 
-function updateTimeSlot() {
-  editForm.put(`/admin/time-slots/${editingSlot.value.id}`, {
-    onSuccess: () => {
-      closeEditModal()
-    }
-  })
+function submitForm() {
+  if (showEditModal.value) {
+    router.put(`/admin/time-slots/${editingSlot.value.id}`, form.value, {
+      onSuccess: () => closeModal()
+    })
+  } else {
+    router.post('/admin/time-slots', form.value, {
+      onSuccess: () => closeModal()
+    })
+  }
 }
 
-function deleteTimeSlot(slotId) {
+function deleteSlot(id) {
   if (confirm('Are you sure you want to delete this time slot?')) {
-    router.delete(`/admin/time-slots/${slotId}`)
+    router.delete(`/admin/time-slots/${id}`)
   }
 }
 </script>

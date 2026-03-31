@@ -35,7 +35,7 @@ class TimeSlot extends Model
     {
         $bookedSlots = $this->bookings()
             ->where('booking_date', $date)
-            ->whereIn('booking_status', ['confirmed', 'checked_in'])
+            ->whereIn('booking_status', ['confirmed', 'pending'])
             ->sum('number_of_people');
 
         return max(0, $this->max_people - $bookedSlots);

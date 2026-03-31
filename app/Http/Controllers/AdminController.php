@@ -16,7 +16,7 @@ class AdminController extends Controller
     public function index()
     {
         $todayBookings = Booking::whereDate('booking_date', today())
-            ->whereIn('booking_status', ['confirmed', 'checked_in'])
+            ->whereIn('booking_status', ['confirmed', 'pending'])
             ->count();
 
         $totalRevenue = Booking::where('payment_status', 'paid')
@@ -39,8 +39,8 @@ class AdminController extends Controller
     {
         $query = Booking::with('timeSlot')->orderBy('booking_date', 'desc');
 
-        if ($request->has('status') && $request->status !== 'all') {
-            $query->where('booking_status', $request->status);
+        if ($request->has('booking_status') && $request->booking_status !== 'all') {
+            $query->where('booking_status', $request->booking_status);
         }
 
         if ($request->has('date')) {
@@ -49,9 +49,14 @@ class AdminController extends Controller
 
         $bookings = $query->paginate(20);
 
+        $timeSlots = TimeSlot::orderBy('start_time')->get();
+        $packages = Package::orderBy('sort_order')->orderBy('km')->get();
+
         return inertia('Admin/Bookings', [
             'bookings' => $bookings,
-            'filters' => $request->only(['status', 'date']),
+            'timeSlots' => $timeSlots,
+            'packages' => $packages,
+            'filters' => $request->only(['booking_status', 'date']),
         ]);
     }
 
@@ -70,7 +75,7 @@ class AdminController extends Controller
             'start_time' => 'required',
             'end_time' => 'required',
             'max_people' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
+            'price' => 'numeric|min:0',
             'is_active' => 'boolean',
         ]);
 
@@ -230,6 +235,39 @@ class AdminController extends Controller
         return back()->with('success', 'Gallery item deleted successfully!');
     }
 
+    public function updateBooking(Request $request, Booking $booking)
+    {
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_email' => 'required|email|max:255',
+            'customer_phone' => 'required|string|max:20',
+            'booking_date' => 'required|date',
+            'time_slot_id' => 'required|exists:time_slots,id',
+            'package_id' => 'required|exists:packages,id',
+            'number_of_people' => 'required|integer|min:1',
+            'booking_status' => 'required|in:pending,confirmed,cancelled,completed',
+        ]);
+
+        // Ensure booking_status is properly set
+        $booking->booking_status = $validated['booking_status'];
+        $booking->save();
+
+        // Update other fields
+        $booking->update(array_merge(
+            $validated,
+            ['booking_status' => $validated['booking_status']]
+        ));
+
+        return back()->with('success', 'Booking updated successfully!');
+    }
+
+    public function deleteBooking(Booking $booking)
+    {
+        $booking->delete();
+
+        return back()->with('success', 'Booking deleted successfully!');
+    }
+
     public function updatePaymentStatus(Request $request)
     {
         $validated = $request->validate([
@@ -325,19 +363,39 @@ class AdminController extends Controller
 
     public function settings()
     {
-        $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
+        $siteSettings = [
+            'site_name' => SiteSetting::getValue('site_name', 'River Rafting Adventure'),
+            'favicon_url' => SiteSetting::getValue('favicon_url', '/favicon.ico'),
+            'phone_number' => SiteSetting::getValue('phone_number', ''),
+            'whatsapp_number' => SiteSetting::getValue('whatsapp_number', ''),
+            'email' => SiteSetting::getValue('email', ''),
+            'address' => SiteSetting::getValue('address', ''),
+            'google_map_embed' => SiteSetting::getValue('google_map_embed', ''),
+        ];
 
         return inertia('Admin/Settings', [
-            'googleMapEmbed' => $googleMapEmbed,
+            'siteSettings' => $siteSettings,
         ]);
     }
 
     public function updateSettings(Request $request)
     {
         $validated = $request->validate([
+            'site_name' => 'nullable|string|max:255',
+            'favicon_url' => 'nullable|string|max:500',
+            'phone_number' => 'nullable|string|max:20',
+            'whatsapp_number' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string|max:500',
             'google_map_embed' => 'nullable|string',
         ]);
 
+        SiteSetting::setValue('site_name', $validated['site_name'] ?? 'River Rafting Adventure');
+        SiteSetting::setValue('favicon_url', $validated['favicon_url'] ?? '/favicon.ico');
+        SiteSetting::setValue('phone_number', $validated['phone_number'] ?? '');
+        SiteSetting::setValue('whatsapp_number', $validated['whatsapp_number'] ?? '');
+        SiteSetting::setValue('email', $validated['email'] ?? '');
+        SiteSetting::setValue('address', $validated['address'] ?? '');
         SiteSetting::setValue('google_map_embed', $validated['google_map_embed'] ?? '');
 
         return back()->with('success', 'Settings updated successfully!');

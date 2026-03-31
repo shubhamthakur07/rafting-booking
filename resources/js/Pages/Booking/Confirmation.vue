@@ -126,9 +126,17 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Contact Buttons -->
+  <FloatingContact
+    :phone-number="$page.props.siteSettings?.phoneNumber"
+    :whatsapp-number="$page.props.siteSettings?.whatsappNumber"
+  />
 </template>
 
 <script setup>
+import FloatingContact from '@/Components/FloatingContact.vue'
+
 const props = defineProps({
   booking: Object,
 })

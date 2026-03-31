@@ -4,7 +4,7 @@
       <!-- Google Map Section -->
       <div v-if="googleMapEmbed" class="mb-8">
         <h3 class="text-xl font-bold text-center mb-4">Find Us</h3>
-        <div class="rounded-lg overflow-hidden shadow-lg max-w-2xl mx-auto" v-html="googleMapEmbed"></div>
+        <div class="rounded-lg overflow-hidden shadow-lg max-w-md mx-auto" v-html="googleMapEmbed"></div>
       </div>
 
       <div class="text-center">

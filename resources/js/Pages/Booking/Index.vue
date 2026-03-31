@@ -1,7 +1,9 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <PublicNav />
+
     <!-- Hero Section -->
-    <section class="relative h-[300px] md:h-[400px] lg:h-[600px] flex items-center justify-center overflow-hidden">
+    <section class="relative h-[300px] md:h-[400px] lg:h-[600px] flex items-center justify-center overflow-hidden pt-16">
       <div class="absolute inset-0 bg-gradient-to-b from-blue-900/70 to-blue-800/50 z-10"></div>
       <img
         src="https://images.unsplash.com/photo-1530866495561-507c9faab2ed?w=1920"
@@ -432,13 +434,21 @@
 
     <!-- Footer -->
     <Footer :googleMapEmbed="googleMapEmbed" />
+
+    <!-- Floating Contact Buttons -->
+    <FloatingContact
+      :phone-number="$page.props.siteSettings?.phoneNumber"
+      :whatsapp-number="$page.props.siteSettings?.whatsappNumber"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import PublicNav from '@/Components/PublicNav.vue'
 import Footer from '@/Components/Footer.vue'
+import FloatingContact from '@/Components/FloatingContact.vue'
 
 const props = defineProps({
   timeSlots: Array,
@@ -501,25 +511,15 @@ const totalPrice = computed(() => {
 })
 
 const canSubmit = computed(() => {
-  return selectedSlot.value &&
-         selectedPackage.value &&
-         form.customer_name &&
-         form.customer_email &&
-         form.customer_phone &&
-         form.number_of_people > 0
+  return selectedSlot.value && form.customer_name && form.customer_email && form.customer_phone
 })
 
-function formatTime(timeString) {
-  if (!timeString) return '';
-
-  const timePart = timeString.split('T')[1].split('.')[0];
-
-  const [hours, minutes] = timePart.split(':');
-  const hour = parseInt(hours);
-  const ampm = hour >= 12 ? 'PM' : 'AM';
-  const hour12 = hour % 12 || 12;
-
-  return `${hour12}:${minutes} ${ampm}`;
+function formatTime(time) {
+  const [hours, minutes] = time.split(':')
+  const hour = parseInt(hours)
+  const ampm = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour % 12 || 12
+  return `${hour12}:${minutes} ${ampm}`
 }
 
 async function loadAvailableSlots() {
@@ -527,97 +527,93 @@ async function loadAvailableSlots() {
 
   try {
     const response = await fetch(`/booking/available-slots?date=${form.booking_date}`)
-    availableSlots.value = await response.json()
+    const data = await response.json()
+    availableSlots.value = data
     selectedSlot.value = null
-    form.time_slot_id = null
   } catch (error) {
-    console.error('Error loading slots:', error)
+    console.error('Error loading time slots:', error)
   }
-}
-
-function selectSlot(slot) {
-  if (slot.available < 1) return
-  selectedSlot.value = slot
-  form.time_slot_id = slot.id
 }
 
 function selectPackage(pkg) {
   selectedPackage.value = pkg
   form.package_id = pkg.id
+  selectedSlot.value = null
 }
 
-// for payment stripe
-// async function submitBooking() {
-//   if (!canSubmit.value) return
-//   loading.value = true
-
-//   try {
-//     const response = await axios.post('/booking', form.data())
-//     if (response.data.url) {
-//       window.location.href = response.data.url // This triggers the redirect safely
-//     }
-//   } catch (error) {
-//     loading.value = false
-//     alert('Something went wrong.')
-//   }
-// }
+function selectSlot(slot) {
+  selectedSlot.value = slot
+  form.time_slot_id = slot.id
+}
 
 async function submitBooking() {
-    loading.value = true;
+  if (!canSubmit.value) return
 
-    try {
-        const response = await axios.post('/booking', form.data());
-        const data = response.data;
+  loading.value = true
 
-        // If payment method is 'at_site', redirect to confirmation page
-        if (form.payment_method === 'at_site') {
-            window.location.href = `/booking/confirmation/${data.booking_id}`;
-            return;
+  try {
+    const response = await fetch('/booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify(form)
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      if (form.payment_method === 'online' && data.payment_type === 'razorpay') {
+        // Initialize Razorpay payment
+        const options = {
+          key: data.key,
+          amount: data.amount,
+          currency: 'INR',
+          name: 'River Rafting Kullu Manali',
+          description: 'Booking Payment',
+          order_id: data.order_id,
+          handler: function (response) {
+            // Payment successful, redirect to confirmation
+            window.location.href = `/booking/confirmation/${data.booking_id}`
+          },
+          prefill: {
+            name: data.name,
+            email: data.email,
+            contact: data.phone
+          },
+          theme: {
+            color: '#f97316'
+          }
         }
 
-        // For online payment, open Razorpay
-        const options = {
-            "key": data.key,
-            "amount": data.amount,
-            "currency": "INR",
-            "name": "Himachal River Rafting",
-            "description": "Booking for " + data.name,
-            "order_id": data.order_id,
-            "handler": function (response) {
-                window.location.href = `/booking/success/${data.booking_id}?payment_id=${response.razorpay_payment_id}`;
-            },
-            "prefill": {
-                "name": data.name,
-                "email": data.email,
-                "contact": data.phone
-            },
-            "theme": {
-                "color": "#3399cc"
-            },
-            "modal": {
-                "ondismiss": function() {
-                    loading.value = false;
-                }
-            }
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-
-    } catch (error) {
-        loading.value = false;
-        console.error(error);
-        alert("Could not process booking. Please try again.");
+        const rzp = new window.Razorpay(options)
+        rzp.on('payment.failed', function (response) {
+          alert('Payment failed. Please try again.')
+          loading.value = false
+        })
+        rzp.open()
+      } else {
+        window.location.href = `/booking/confirmation/${data.booking_id}`
+      }
+    } else {
+      alert(data.error || 'Booking failed. Please try again.')
     }
+  } catch (error) {
+    console.error('Error submitting booking:', error)
+    alert('Booking failed. Please try again.')
+  }
+
+  loading.value = false
 }
 
-// Contact form
-const contactForm = ref({
+const contactForm = useForm({
   name: '',
   email: '',
   phone: '',
   message: ''
 })
+
 const contactSending = ref(false)
 const contactSuccess = ref('')
 
@@ -626,35 +622,27 @@ async function submitContact() {
   contactSuccess.value = ''
 
   try {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
-    if (!csrfToken) {
-      alert('CSRF token not found. Please refresh the page.')
-      return
-    }
-
     const response = await fetch('/contact', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRF-TOKEN': csrfToken
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
       },
-      body: JSON.stringify(contactForm.value)
+      body: JSON.stringify(contactForm)
     })
 
-    const data = await response.json()
-
     if (response.ok) {
-      contactSuccess.value = data.success || 'Thank you! Your message has been sent.'
-      contactForm.value = { name: '', email: '', phone: '', message: '' }
+      contactSuccess.value = 'Message sent successfully! We will get back to you soon.'
+      contactForm.reset()
     } else {
-      alert('Failed to send message. Please try again.')
+      const data = await response.json()
+      alert(data.error || 'Failed to send message. Please try again.')
     }
   } catch (error) {
-    console.error('Error submitting contact form:', error)
+    console.error('Error sending contact:', error)
     alert('Failed to send message. Please try again.')
-  } finally {
-    contactSending.value = false
   }
+
+  contactSending.value = false
 }
 </script>

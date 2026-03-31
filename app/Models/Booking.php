@@ -76,7 +76,7 @@ class Booking extends Model
 
     public function checkIn(): void
     {
-        $this->update(['booking_status' => 'checked_in']);
+        $this->update(['booking_status' => 'confirmed']);
     }
 
     public function complete(): void
@@ -110,7 +110,7 @@ class Booking extends Model
     {
         return match($this->booking_status) {
             'confirmed' => 'Confirmed',
-            'checked_in' => 'Checked In',
+            'pending' => 'Pending',
             'completed' => 'Completed',
             'cancelled' => 'Cancelled',
             default => 'Unknown',

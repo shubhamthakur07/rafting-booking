@@ -6,69 +6,52 @@
       <div class="px-4 py-6 sm:px-0">
         <div class="flex justify-between items-center mb-6">
           <h2 class="text-2xl font-bold text-gray-900">Bookings</h2>
-
-          <!-- QR Scanner Section -->
-          <div class="flex items-center space-x-4">
-            <div class="flex">
-              <input
-                v-model="scanReference"
-                type="text"
-                placeholder="Enter booking reference"
-                class="px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <button
-                @click="handleCheckIn"
-                :disabled="!scanReference || processing"
-                class="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 disabled:bg-gray-400"
-              >
-                {{ processing ? 'Processing...' : 'Check In / Mark Paid' }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Success Message -->
-        <div v-if="successMessage" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-          {{ successMessage }}
-        </div>
-
-        <!-- Error Message -->
-        <div v-if="errorMessage" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-          {{ errorMessage }}
+          <button
+            @click="showCreateModal = true"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            Add Booking
+          </button>
         </div>
 
         <!-- Filters -->
-        <div class="bg-white rounded-lg shadow mb-6 p-4">
-          <div class="flex flex-wrap items-center gap-4">
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                v-model="filters.status"
-                @change="applyFilters"
-                class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">All</option>
+              <select v-model="filters.booking_status" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
                 <option value="confirmed">Confirmed</option>
-                <option value="checked_in">Checked In</option>
-                <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
+                <option value="completed">Completed</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
               <input
-                v-model="filters.date"
                 type="date"
-                @change="applyFilters"
-                class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                v-model="filters.date"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
               />
             </div>
-            <button
-              @click="clearFilters"
-              class="px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              Clear Filters
-            </button>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+              <input
+                type="text"
+                v-model="filters.search"
+                placeholder="Name, email, or reference..."
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            <div class="flex items-end">
+              <button
+                @click="resetFilters"
+                class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         </div>
 
@@ -78,83 +61,56 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guests</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">People</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="booking in bookings.data" :key="booking.id">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="font-medium text-blue-600">{{ booking.booking_reference }}</span>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {{ booking.booking_reference }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  {{ formatDate(booking.booking_date) }}
-                  <span class="text-gray-500 text-sm ml-2">{{ booking.time_slot?.start_time }}</span>
-                </td>
-                <td class="px-6 py-4">
                   <div class="text-sm font-medium text-gray-900">{{ booking.customer_name }}</div>
                   <div class="text-sm text-gray-500">{{ booking.customer_email }}</div>
+                  <div class="text-sm text-gray-500">{{ booking.customer_phone }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ formatDate(booking.booking_date) }}</div>
+                  <div class="text-sm text-gray-500">{{ booking.time_slot?.start_time }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ booking.package?.name || 'N/A' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {{ booking.number_of_people }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <select
-                    :value="booking.payment_status"
-                    @change="updatePaymentStatus(booking.id, $event.target.value)"
-                    :class="[
-                      'pe-6 py-1 text-xs font-semibold rounded-full cursor-pointer border-0',
-                      booking.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
-                      booking.payment_status === 'at_site' ? 'bg-orange-100 text-orange-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    ]"
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="at_site">Pay at Site</option>
-                  </select>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ₹{{ booking.total_price }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    :class="[
-                      'px-2 py-1 text-xs font-semibold rounded-full',
-                      booking.booking_status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                      booking.booking_status === 'checked_in' ? 'bg-purple-100 text-purple-800' :
-                      booking.booking_status === 'completed' ? 'bg-green-100 text-green-800' :
-                      'bg-red-100 text-red-800'
-                    ]"
-                  >
-                    {{ booking.booking_status }}
+                  <span :class="getStatusClass(booking.booking_status)" class="px-2 py-1 text-xs font-medium rounded-full">
+                    {{ getStatusLabel(booking.booking_status) }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <div class="flex space-x-2">
-                    <button
-                      v-if="booking.booking_status === 'confirmed'"
-                      @click="checkIn(booking.booking_reference)"
-                      class="text-blue-600 hover:text-blue-800"
-                    >
-                      Check In
-                    </button>
-                    <button
-                      v-if="booking.booking_status === 'checked_in'"
-                      @click="complete(booking.booking_reference)"
-                      class="text-green-600 hover:text-green-800"
-                    >
-                      Complete
-                    </button>
-                    <button
-                      v-if="booking.payment_status === 'at_site' && booking.booking_status !== 'completed'"
-                      @click="markPaid(booking.booking_reference)"
-                      class="text-orange-600 hover:text-orange-800"
-                    >
-                      Mark Paid
-                    </button>
-                  </div>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    @click="editBooking(booking)"
+                    class="text-blue-600 hover:text-blue-900 mr-3"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    @click="deleteBooking(booking.id)"
+                    class="text-red-600 hover:text-red-900"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -162,187 +118,250 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-4">
-          <p class="text-sm text-gray-600">
-            Showing {{ bookings.from }} to {{ bookings.to }} of {{ bookings.total }} results
-          </p>
+        <div class="mt-4 flex justify-center">
+          <nav class="flex space-x-2">
+            <button
+              v-for="link in bookings.links"
+              :key="link.label"
+              @click="goToPage(link.url)"
+              :disabled="!link.url"
+              :class="[
+                'px-3 py-2 text-sm rounded-lg',
+                link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
+                !link.url ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              ]"
+              v-html="link.label"
+            />
+          </nav>
         </div>
       </div>
     </main>
+
+    <!-- Create/Edit Modal -->
+    <Modal :show="showCreateModal || showEditModal" @close="closeModal">
+      <div class="p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+          {{ showEditModal ? 'Edit Booking' : 'Create Booking' }}
+        </h3>
+        <form @submit.prevent="submitForm">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+              <input
+                type="text"
+                v-model="form.customer_name"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Customer Email</label>
+              <input
+                type="email"
+                v-model="form.customer_email"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Customer Phone</label>
+              <input
+                type="tel"
+                v-model="form.customer_phone"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Booking Date</label>
+              <input
+                type="date"
+                v-model="form.booking_date"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Time Slot</label>
+              <select v-model="form.time_slot_id" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                <option value="">Select Time Slot</option>
+                <option v-for="slot in timeSlots" :key="slot.id" :value="slot.id">
+                  {{ slot.start_time }} - {{ slot.end_time }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Package</label>
+              <select v-model="form.package_id" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                <option value="">Select Package</option>
+                <option v-for="pkg in packages" :key="pkg.id" :value="pkg.id">
+                  {{ pkg.name }} ({{ pkg.km }} km) - ₹{{ pkg.price }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Number of People</label>
+              <input
+                type="number"
+                v-model="form.number_of_people"
+                min="1"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <select v-model="form.booking_status" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button
+              type="button"
+              @click="closeModal"
+              class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
+              {{ showEditModal ? 'Update' : 'Create' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
+import { ref, watch } from 'vue'
+import { router } from '@inertiajs/vue3'
 import AdminNav from '@/Components/AdminNav.vue'
+import Modal from '@/Components/Modal.vue'
 
 const props = defineProps({
   bookings: Object,
-  filters: Object,
+  timeSlots: Array,
+  packages: Array,
+  filters: Object
 })
 
-const scanReference = ref('')
-const processing = ref(false)
-const successMessage = ref('')
-const errorMessage = ref('')
+const showCreateModal = ref(false)
+const showEditModal = ref(false)
+const editingBooking = ref(null)
 
-const filters = useForm({
-  status: props.filters?.status || 'all',
+const filters = ref({
+  booking_status: props.filters?.booking_status || '',
   date: props.filters?.date || '',
+  search: props.filters?.search || ''
 })
+
+const form = ref({
+  customer_name: '',
+  customer_email: '',
+  customer_phone: '',
+  booking_date: '',
+  time_slot_id: '',
+  package_id: '',
+  number_of_people: 1,
+  booking_status: 'pending'
+})
+
+watch(filters, (newFilters) => {
+  router.get('/admin/bookings', newFilters, { preserveState: true, preserveScroll: true })
+}, { deep: true })
+
+function resetFilters() {
+  filters.value = { booking_status: '', date: '', search: '' }
+}
 
 function formatDate(date) {
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString('en-IN', {
+    year: 'numeric',
     month: 'short',
-    day: 'numeric',
-    year: 'numeric'
+    day: 'numeric'
   })
 }
 
-function applyFilters() {
-  const params = new URLSearchParams()
-  if (filters.status !== 'all') params.append('status', filters.status)
-  if (filters.date) params.append('date', filters.date)
-
-  const query = params.toString()
-  window.location.href = `/admin/bookings${query ? '?' + query : ''}`
-}
-
-function clearFilters() {
-  window.location.href = '/admin/bookings'
-}
-
-async function handleCheckIn() {
-  if (!scanReference.value) return
-
-  processing.value = true
-  successMessage.value = ''
-  errorMessage.value = ''
-
-  try {
-    const response = await fetch('/admin/check-in', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-      },
-      body: JSON.stringify({ reference: scanReference.value })
-    })
-
-    const data = await response.json()
-
-    if (response.ok) {
-      successMessage.value = data.message
-      scanReference.value = ''
-      setTimeout(() => window.location.reload(), 1500)
-    } else {
-      errorMessage.value = data.error || 'An error occurred'
-    }
-  } catch (error) {
-    errorMessage.value = 'Failed to process request'
+function getStatusClass(booking_status) {
+  const classes = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    confirmed: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800',
+    completed: 'bg-blue-100 text-blue-800'
   }
-
-  processing.value = false
+  return classes[booking_status] || 'bg-gray-100 text-gray-800'
 }
 
-async function checkIn(reference) {
-  try {
-    const response = await fetch('/admin/check-in', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-      },
-      body: JSON.stringify({ reference })
-    })
+function getStatusLabel(booking_status) {
+  const labels = {
+    pending: 'Pending',
+    confirmed: 'Confirmed',
+    cancelled: 'Cancelled',
+    completed: 'Completed'
+  }
+  return labels[booking_status] || booking_status
+}
 
-    if (response.ok) {
-      window.location.reload()
-    }
-  } catch (error) {
-    console.error('Error:', error)
+function editBooking(booking) {
+  editingBooking.value = booking
+  form.value = {
+    customer_name: booking.customer_name,
+    customer_email: booking.customer_email,
+    customer_phone: booking.customer_phone,
+    booking_date: booking.booking_date ? booking.booking_date.split('T')[0] : '',
+    time_slot_id: booking.time_slot_id,
+    package_id: booking.package_id,
+    number_of_people: booking.number_of_people,
+    booking_status: booking.booking_status
+  }
+  showEditModal.value = true
+}
+
+function closeModal() {
+  showCreateModal.value = false
+  showEditModal.value = false
+  editingBooking.value = null
+  form.value = {
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    booking_date: '',
+    time_slot_id: '',
+    package_id: '',
+    number_of_people: 1,
+    booking_status: 'pending'
   }
 }
 
-async function markPaid(reference) {
-  try {
-    const response = await fetch('/admin/mark-paid', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-      },
-      body: JSON.stringify({ reference })
+function submitForm() {
+  if (showEditModal.value) {
+    router.put(`/admin/bookings/${editingBooking.value.id}`, form.value, {
+      onSuccess: () => closeModal()
     })
-
-    if (response.ok) {
-      window.location.reload()
-    }
-  } catch (error) {
-    console.error('Error:', error)
+  } else {
+    router.post('/admin/bookings', form.value, {
+      onSuccess: () => closeModal()
+    })
   }
 }
 
-async function complete(reference) {
-  try {
-    const response = await fetch('/admin/complete', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-      },
-      body: JSON.stringify({ reference })
-    })
-
-    if (response.ok) {
-      window.location.reload()
-    }
-  } catch (error) {
-    console.error('Error:', error)
+function deleteBooking(id) {
+  if (confirm('Are you sure you want to delete this booking?')) {
+    router.delete(`/admin/bookings/${id}`)
   }
 }
 
-const getCsrfToken = () => {
-  const meta = document.querySelector('meta[name="csrf-token"]')
-  return meta ? meta.content : ''
-}
-
-async function updatePaymentStatus(bookingId, newStatus) {
-  const csrfToken = getCsrfToken()
-  if (!csrfToken) {
-    errorMessage.value = 'Security token not found. Please refresh the page.'
-    return
-  }
-
-  try {
-    const response = await fetch('/admin/update-payment-status', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken
-      },
-      body: JSON.stringify({ booking_id: bookingId, payment_status: newStatus })
-    })
-
-    const data = await response.json()
-
-    if (response.ok) {
-      successMessage.value = data.message || 'Payment status updated successfully'
-      setTimeout(() => {
-        successMessage.value = ''
-      }, 3000)
-      // Reload page to show updated status
-      setTimeout(() => {
-        window.location.reload()
-      }, 1000)
-    }
-  } catch (error) {
-    console.error('Error:', error)
-    errorMessage.value = 'Failed to update payment status'
-    setTimeout(() => {
-      errorMessage.value = ''
-    }, 3000)
+function goToPage(url) {
+  if (url) {
+    router.get(url)
   }
 }
 </script>

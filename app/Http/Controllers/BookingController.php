@@ -26,6 +26,14 @@ class BookingController extends Controller
         $videos = GalleryImage::videos()->active()->take(4)->get();
         $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
 
+        // Get site settings for FloatingContact component
+        $siteSettings = [
+            'phoneNumber' => SiteSetting::getValue('phone_number', ''),
+            'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
+            'email' => SiteSetting::getValue('email', ''),
+            'address' => SiteSetting::getValue('address', ''),
+        ];
+
         return inertia('Booking/Index', [
             'timeSlots' => $timeSlots,
             'packages' => $packages,
@@ -33,6 +41,7 @@ class BookingController extends Controller
             'galleryImages' => $galleryImages,
             'videos' => $videos,
             'googleMapEmbed' => $googleMapEmbed,
+            'siteSettings' => $siteSettings,
         ]);
     }
 
@@ -249,8 +258,17 @@ class BookingController extends Controller
     {
         $booking->load('timeSlot');
 
+        // Get site settings for FloatingContact component
+        $siteSettings = [
+            'phoneNumber' => SiteSetting::getValue('phone_number', ''),
+            'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
+            'email' => SiteSetting::getValue('email', ''),
+            'address' => SiteSetting::getValue('address', ''),
+        ];
+
         return inertia('Booking/Confirmation', [
             'booking' => $booking,
+            'siteSettings' => $siteSettings,
         ]);
     }
 
@@ -321,6 +339,84 @@ class BookingController extends Controller
             'success' => true,
             'booking' => $booking,
             'message' => 'Booking marked as completed!',
+        ]);
+    }
+
+    public function packages()
+    {
+        $packages = Package::getActivePackages();
+        $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
+
+        // Get site settings for FloatingContact component
+        $siteSettings = [
+            'phoneNumber' => SiteSetting::getValue('phone_number', ''),
+            'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
+            'email' => SiteSetting::getValue('email', ''),
+            'address' => SiteSetting::getValue('address', ''),
+        ];
+
+        return inertia('Packages', [
+            'packages' => $packages,
+            'googleMapEmbed' => $googleMapEmbed,
+            'siteSettings' => $siteSettings,
+        ]);
+    }
+
+    public function gallery()
+    {
+        $galleryImages = GalleryImage::photos()->active()->get();
+        $videos = GalleryImage::videos()->active()->get();
+        $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
+
+        // Get site settings for FloatingContact component
+        $siteSettings = [
+            'phoneNumber' => SiteSetting::getValue('phone_number', ''),
+            'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
+            'email' => SiteSetting::getValue('email', ''),
+            'address' => SiteSetting::getValue('address', ''),
+        ];
+
+        return inertia('Gallery', [
+            'galleryImages' => $galleryImages,
+            'videos' => $videos,
+            'googleMapEmbed' => $googleMapEmbed,
+            'siteSettings' => $siteSettings,
+        ]);
+    }
+
+    public function contact()
+    {
+        $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
+
+        // Get site settings for FloatingContact component
+        $siteSettings = [
+            'phoneNumber' => SiteSetting::getValue('phone_number', ''),
+            'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
+            'email' => SiteSetting::getValue('email', ''),
+            'address' => SiteSetting::getValue('address', ''),
+        ];
+
+        return inertia('Contact', [
+            'googleMapEmbed' => $googleMapEmbed,
+            'siteSettings' => $siteSettings,
+        ]);
+    }
+
+    public function about()
+    {
+        $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
+
+        // Get site settings for FloatingContact component
+        $siteSettings = [
+            'phoneNumber' => SiteSetting::getValue('phone_number', ''),
+            'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
+            'email' => SiteSetting::getValue('email', ''),
+            'address' => SiteSetting::getValue('address', ''),
+        ];
+
+        return inertia('About', [
+            'googleMapEmbed' => $googleMapEmbed,
+            'siteSettings' => $siteSettings,
         ]);
     }
 }

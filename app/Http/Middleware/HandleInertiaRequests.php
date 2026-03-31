@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\SiteSetting;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -33,6 +34,10 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+            ],
+            'siteSettings' => [
+                'phoneNumber' => SiteSetting::getValue('phone_number', ''),
+                'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             ],
         ];
     }

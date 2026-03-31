@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import FloatingContact from '@/Components/FloatingContact.vue';
 
 defineProps({
     canLogin: {
@@ -383,4 +384,10 @@ function handleImageError() {
             </div>
         </div>
     </div>
+
+    <!-- Floating Contact Buttons -->
+    <FloatingContact
+        :phone-number="$page.props.siteSettings?.phoneNumber"
+        :whatsapp-number="$page.props.siteSettings?.whatsappNumber"
+    />
 </template>
