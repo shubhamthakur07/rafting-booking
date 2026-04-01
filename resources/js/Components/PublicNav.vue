@@ -6,7 +6,7 @@
         <div class="flex-shrink-0">
           <a href="/" class="flex items-center">
             <img
-              src="/storage/LOGO/SiteLogo.png"
+              :src="logoUrl"
               alt="Logo"
               class="h-20 w-auto"
               @error="$event.target.style.display='none'"
@@ -86,9 +86,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { usePage } from '@inertiajs/vue3'
 
 const isOpen = ref(false)
+
+const page = usePage()
+
+const logoUrl = computed(() => {
+  return page.props.siteSettings?.logoUrl || '/storage/LOGO/SiteLogo.png'
+})
 
 const navItems = [
   { name: 'Home', href: '/' },

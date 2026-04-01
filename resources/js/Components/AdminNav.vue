@@ -11,7 +11,7 @@
               @error="$event.target.style.display='none'"
             />
           </a>
-          <h1 class="text-xl font-bold text-gray-900">River Rafting Admin</h1>
+          <h1 class="text-xl font-bold text-gray-900">River Rafting kullu Manali</h1>
         </div>
 
         <!-- Desktop Navigation -->

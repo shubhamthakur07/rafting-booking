@@ -32,6 +32,7 @@ class BookingController extends Controller
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
+            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
         ];
 
         return inertia('Booking/Index', [
@@ -264,6 +265,7 @@ class BookingController extends Controller
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
+            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
         ];
 
         return inertia('Booking/Confirmation', [
@@ -353,6 +355,7 @@ class BookingController extends Controller
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
+            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
         ];
 
         return inertia('Packages', [
@@ -374,6 +377,7 @@ class BookingController extends Controller
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
+            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
         ];
 
         return inertia('Gallery', [
@@ -394,6 +398,7 @@ class BookingController extends Controller
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
+            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
         ];
 
         return inertia('Contact', [
@@ -412,6 +417,7 @@ class BookingController extends Controller
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
+            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
         ];
 
         return inertia('About', [

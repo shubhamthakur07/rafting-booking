@@ -21,7 +21,7 @@
           />
         </div>
         <h1 class="text-3xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 tracking-tight">
-          River rafting kullu manali
+          River Rafting kullu Manali
         </h1>
         <p class="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 text-blue-100">
           Experience the thrill of a lifetime! Book your adventure today.

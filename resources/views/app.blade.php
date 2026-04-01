@@ -8,8 +8,11 @@
         <title inertia>{{ config('app.name', 'River Rafting Adventure') }}</title>
 
         <!-- Favicon -->
-        <link rel="icon" type="image/png" href="/storage/LOGO/SiteLogo.png">
-        <link rel="apple-touch-icon" href="/storage/LOGO/SiteLogo.png">
+        @php
+            $faviconUrl = \App\Models\SiteSetting::getValue('favicon_url', '/storage/LOGO/SiteLogo.png');
+        @endphp
+        <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
+        <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
         <meta name="theme-color" content="#ffffff">
 
         <!-- Fonts -->

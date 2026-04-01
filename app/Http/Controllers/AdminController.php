@@ -365,6 +365,7 @@ class AdminController extends Controller
     {
         $siteSettings = [
             'site_name' => SiteSetting::getValue('site_name', 'River Rafting Adventure'),
+            'logo_url' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
             'favicon_url' => SiteSetting::getValue('favicon_url', '/favicon.ico'),
             'phone_number' => SiteSetting::getValue('phone_number', ''),
             'whatsapp_number' => SiteSetting::getValue('whatsapp_number', ''),
@@ -382,7 +383,8 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'site_name' => 'nullable|string|max:255',
-            'favicon_url' => 'nullable|string|max:500',
+            'logo_file' => 'nullable|file|mimes:jpeg,png,gif,svg,webp|max:2048',
+            'favicon_file' => 'nullable|file|mimes:jpeg,png,gif,ico,webp|max:512',
             'phone_number' => 'nullable|string|max:20',
             'whatsapp_number' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
@@ -390,8 +392,23 @@ class AdminController extends Controller
             'google_map_embed' => 'nullable|string',
         ]);
 
+        // Handle logo file upload
+        if ($request->hasFile('logo_file')) {
+            $file = $request->file('logo_file');
+            $filename = 'SiteLogo.' . $file->getClientOriginalExtension();
+            $file->storeAs('LOGO', $filename, 'public');
+            SiteSetting::setValue('logo_url', '/storage/LOGO/' . $filename);
+        }
+
+        // Handle favicon file upload
+        if ($request->hasFile('favicon_file')) {
+            $file = $request->file('favicon_file');
+            $filename = 'favicon.' . $file->getClientOriginalExtension();
+            $file->move(public_path(), $filename);
+            SiteSetting::setValue('favicon_url', '/' . $filename);
+        }
+
         SiteSetting::setValue('site_name', $validated['site_name'] ?? 'River Rafting Adventure');
-        SiteSetting::setValue('favicon_url', $validated['favicon_url'] ?? '/favicon.ico');
         SiteSetting::setValue('phone_number', $validated['phone_number'] ?? '');
         SiteSetting::setValue('whatsapp_number', $validated['whatsapp_number'] ?? '');
         SiteSetting::setValue('email', $validated['email'] ?? '');

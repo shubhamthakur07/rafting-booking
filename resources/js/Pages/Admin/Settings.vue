@@ -12,6 +12,9 @@ const props = defineProps({
 
 const form = useForm({
     site_name: props.siteSettings.site_name || 'River Rafting Adventure',
+    logo_file: null,
+    logo_url: props.siteSettings.logo_url || '',
+    favicon_file: null,
     favicon_url: props.siteSettings.favicon_url || '/favicon.ico',
     phone_number: props.siteSettings.phone_number || '',
     whatsapp_number: props.siteSettings.whatsapp_number || '',
@@ -19,6 +22,14 @@ const form = useForm({
     address: props.siteSettings.address || '',
     google_map_embed: props.siteSettings.google_map_embed || '',
 });
+
+function handleLogoUpload(event) {
+    form.logo_file = event.target.files[0];
+}
+
+function handleFaviconUpload(event) {
+    form.favicon_file = event.target.files[0];
+}
 
 function submitForm() {
     form.post(route('admin.settings.update'), {
@@ -47,7 +58,7 @@ function submitForm() {
                 </div>
 
                 <!-- Settings Form -->
-                <form @submit.prevent="submitForm">
+                <form @submit.prevent="submitForm" enctype="multipart/form-data">
                     <!-- General Settings Section -->
                     <div class="mb-8 p-6 bg-white rounded-lg shadow">
                         <h3 class="text-lg font-semibold mb-4 text-gray-800">General Settings</h3>
@@ -70,18 +81,48 @@ function submitForm() {
 
                         <div class="mb-6">
                             <label class="block text-gray-700 text-sm font-bold mb-2">
-                                Favicon URL
+                                Site Logo
                             </label>
                             <p class="text-gray-500 text-sm mb-2">
-                                Enter the URL for your site's favicon (e.g., /favicon.ico or https://example.com/favicon.ico)
+                                Upload your site logo (PNG, JPG, SVG). This will be used in the navigation and as favicon.
+                            </p>
+                            <p class="text-gray-500 text-sm mb-2">
+                                Maximum file size: 2MB
                             </p>
                             <input
-                                v-model="form.favicon_url"
-                                type="text"
+                                type="file"
+                                @change="handleLogoUpload"
+                                accept="image/*"
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="/favicon.ico"
                             />
-                            <p v-if="form.errors.favicon_url" class="text-red-500 text-xs mt-1">{{ form.errors.favicon_url }}</p>
+                            <p v-if="form.errors.logo_file" class="text-red-500 text-xs mt-1">{{ form.errors.logo_file }}</p>
+                            <div v-if="form.logo_url" class="mt-2">
+                                <p class="text-sm text-gray-600 mb-1">Current Logo:</p>
+                                <img :src="form.logo_url" alt="Current Logo" class="h-16 w-auto border rounded" />
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">
+                                Favicon
+                            </label>
+                            <p class="text-gray-500 text-sm mb-2">
+                                Upload a favicon (ICO, PNG). Recommended size: 32x32 or 16x16 pixels.
+                            </p>
+                            <p class="text-gray-500 text-sm mb-2">
+                                Maximum file size: 512KB
+                            </p>
+                            <input
+                                type="file"
+                                @change="handleFaviconUpload"
+                                accept="image/*,.ico"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            />
+                            <p v-if="form.errors.favicon_file" class="text-red-500 text-xs mt-1">{{ form.errors.favicon_file }}</p>
+                            <div v-if="form.favicon_url" class="mt-2">
+                                <p class="text-sm text-gray-600 mb-1">Current Favicon:</p>
+                                <img :src="form.favicon_url" alt="Current Favicon" class="h-8 w-8 border rounded" />
+                            </div>
                         </div>
                     </div>
 
