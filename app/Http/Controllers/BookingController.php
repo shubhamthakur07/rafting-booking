@@ -153,8 +153,7 @@ class BookingController extends Controller
 
    public function store(Request $request)
 {
-    // ... (Keep your validation and Booking::create logic the same) ...
-
+    try {
       $validated = $request->validate([
         'time_slot_id' => 'required|exists:time_slots,id',
         'package_id' => 'required|exists:packages,id',
@@ -239,6 +238,11 @@ class BookingController extends Controller
         'payment_type' => 'at_site',
         'booking_id' => $booking->id
     ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Booking failed: ' . $e->getMessage()
+        ], 500);
+    }
 }
 
     public function success(Booking $booking)
