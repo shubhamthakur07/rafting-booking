@@ -19,8 +19,6 @@ class TimeSlot extends Model
     ];
 
     protected $casts = [
-        'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
         'max_people' => 'integer',
         'price' => 'decimal:2',
         'is_active' => 'boolean',
