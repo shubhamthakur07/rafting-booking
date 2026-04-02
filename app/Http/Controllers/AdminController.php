@@ -363,10 +363,13 @@ class AdminController extends Controller
 
     public function settings()
     {
+        $logoFilename = SiteSetting::getValue('logo_url', '');
+        $faviconFilename = SiteSetting::getValue('favicon_url', '');
+
         $siteSettings = [
             'site_name' => SiteSetting::getValue('site_name', 'River Rafting Adventure'),
-            'logo_url' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
-            'favicon_url' => SiteSetting::getValue('favicon_url', '/favicon.ico'),
+            'logo_url' => $logoFilename ? route('logo.image', ['filename' => $logoFilename]) : '',
+            'favicon_url' => $faviconFilename ? route('favicon.image', ['filename' => $faviconFilename]) : '',
             'phone_number' => SiteSetting::getValue('phone_number', ''),
             'whatsapp_number' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
@@ -395,17 +398,17 @@ class AdminController extends Controller
         // Handle logo file upload
         if ($request->hasFile('logo_file')) {
             $file = $request->file('logo_file');
-            $filename = 'SiteLogo.' . $file->getClientOriginalExtension();
-            $file->storeAs('LOGO', $filename, 'public');
-            SiteSetting::setValue('logo_url', '/storage/LOGO/' . $filename);
+            $filename = time() . '_logo.' . $file->getClientOriginalExtension();
+            $file->storeAs('logo', $filename, 'public');
+            SiteSetting::setValue('logo_url', $filename);
         }
 
         // Handle favicon file upload
         if ($request->hasFile('favicon_file')) {
             $file = $request->file('favicon_file');
-            $filename = 'favicon.' . $file->getClientOriginalExtension();
-            $file->move(public_path(), $filename);
-            SiteSetting::setValue('favicon_url', '/' . $filename);
+            $filename = time() . '_favicon.' . $file->getClientOriginalExtension();
+            $file->storeAs('favicon', $filename, 'public');
+            SiteSetting::setValue('favicon_url', $filename);
         }
 
         SiteSetting::setValue('site_name', $validated['site_name'] ?? 'River Rafting Adventure');

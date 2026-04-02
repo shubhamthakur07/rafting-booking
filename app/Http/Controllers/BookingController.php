@@ -27,12 +27,13 @@ class BookingController extends Controller
         $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
 
         // Get site settings for FloatingContact component
+        $logoFilename = SiteSetting::getValue('logo_url', '');
         $siteSettings = [
             'phoneNumber' => SiteSetting::getValue('phone_number', ''),
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
-            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
+            'logoUrl' => $logoFilename ? route('logo.image', ['filename' => $logoFilename]) : '',
         ];
 
         return inertia('Booking/Index', [
@@ -264,12 +265,13 @@ class BookingController extends Controller
         $booking->load('timeSlot');
 
         // Get site settings for FloatingContact component
+        $logoFilename = SiteSetting::getValue('logo_url', '');
         $siteSettings = [
             'phoneNumber' => SiteSetting::getValue('phone_number', ''),
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
-            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
+            'logoUrl' => $logoFilename ? route('logo.image', ['filename' => $logoFilename]) : '',
         ];
 
         return inertia('Booking/Confirmation', [
@@ -354,12 +356,13 @@ class BookingController extends Controller
         $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
 
         // Get site settings for FloatingContact component
+        $logoFilename = SiteSetting::getValue('logo_url', '');
         $siteSettings = [
             'phoneNumber' => SiteSetting::getValue('phone_number', ''),
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
-            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
+            'logoUrl' => $logoFilename ? route('logo.image', ['filename' => $logoFilename]) : '',
         ];
 
         return inertia('Packages', [
@@ -376,12 +379,13 @@ class BookingController extends Controller
         $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
 
         // Get site settings for FloatingContact component
+        $logoFilename = SiteSetting::getValue('logo_url', '');
         $siteSettings = [
             'phoneNumber' => SiteSetting::getValue('phone_number', ''),
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
-            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
+            'logoUrl' => $logoFilename ? route('logo.image', ['filename' => $logoFilename]) : '',
         ];
 
         return inertia('Gallery', [
@@ -397,12 +401,13 @@ class BookingController extends Controller
         $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
 
         // Get site settings for FloatingContact component
+        $logoFilename = SiteSetting::getValue('logo_url', '');
         $siteSettings = [
             'phoneNumber' => SiteSetting::getValue('phone_number', ''),
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
-            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
+            'logoUrl' => $logoFilename ? route('logo.image', ['filename' => $logoFilename]) : '',
         ];
 
         return inertia('Contact', [
@@ -416,12 +421,13 @@ class BookingController extends Controller
         $googleMapEmbed = SiteSetting::getValue('google_map_embed', '');
 
         // Get site settings for FloatingContact component
+        $logoFilename = SiteSetting::getValue('logo_url', '');
         $siteSettings = [
             'phoneNumber' => SiteSetting::getValue('phone_number', ''),
             'whatsappNumber' => SiteSetting::getValue('whatsapp_number', ''),
             'email' => SiteSetting::getValue('email', ''),
             'address' => SiteSetting::getValue('address', ''),
-            'logoUrl' => SiteSetting::getValue('logo_url', '/storage/LOGO/SiteLogo.png'),
+            'logoUrl' => $logoFilename ? route('logo.image', ['filename' => $logoFilename]) : '',
         ];
 
         return inertia('About', [

@@ -9,7 +9,8 @@
 
         <!-- Favicon -->
         @php
-            $faviconUrl = \App\Models\SiteSetting::getValue('favicon_url', '/storage/LOGO/SiteLogo.png');
+            $faviconFilename = \App\Models\SiteSetting::getValue('favicon_url', '');
+            $faviconUrl = $faviconFilename ? route('favicon.image', ['filename' => $faviconFilename]) : '/favicon.ico';
         @endphp
         <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
         <link rel="apple-touch-icon" href="{{ $faviconUrl }}">

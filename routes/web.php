@@ -32,6 +32,24 @@ Route::get('/gallery/{filename}', function ($filename) {
     return response()->file($path);
 })->name('gallery.image');
 
+// Serve logo images through Laravel route
+Route::get('/logo/{filename}', function ($filename) {
+    $path = storage_path('app/public/logo/' . $filename);
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    return response()->file($path);
+})->name('logo.image');
+
+// Serve favicon images through Laravel route
+Route::get('/favicon/{filename}', function ($filename) {
+    $path = storage_path('app/public/favicon/' . $filename);
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    return response()->file($path);
+})->name('favicon.image');
+
 // Admin routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
